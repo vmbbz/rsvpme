@@ -322,17 +322,17 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               </defs>
               <text 
                 x="300" 
-                y="85" 
+                y="70" 
                 dominantBaseline="central" 
                 textAnchor="middle" 
                 className="font-black"
-                fontSize="160"
-                fontFamily="Cormorant Garamond, Playfair Display, Georgia, serif"
+                fontSize="170"
+                fontFamily="Playfair Display, Georgia, serif"
                 fontWeight="700"
-                letterSpacing="0"
+                letterSpacing="-15"
                 fill="url(#floral)"
                 stroke="white"
-                strokeWidth="1.5"
+                strokeWidth="1"
               >
                 I DO
               </text>
