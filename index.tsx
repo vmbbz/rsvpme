@@ -630,9 +630,9 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
           ))}
         </div>
         <div className="mt-12 md:mt-20 p-4 md:p-8 bg-white/5 rounded-[3rem] border border-white/5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-4">Capacity</p>
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-white" style={{ width: `${Math.min(100, (totals.guests/state.maxGuests)*100)}%` }} /></div>
-          <p className="text-sm mt-3 font-medium">{totals.guests} / {state.maxGuests}</p>
+          <p className="text-[10px] md:text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 md:mb-4">Capacity</p>
+          <div className="h-2 md:h-2 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-white" style={{ width: `${Math.min(100, (totals.guests/state.maxGuests)*100)}%` }} /></div>
+          <p className="text-sm md:text-sm mt-2 md:mt-3 font-medium">{totals.guests} / {state.maxGuests}</p>
         </div>
       </nav>
 
