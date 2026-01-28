@@ -229,8 +229,10 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
     audio.volume = 0.3;
     audioRef.current = audio;
     
-    // Set initial state to false - don't autoplay
-    setMusicPlaying(false);
+    // Auto-play on arrival
+    audio.play().then(() => {
+      setMusicPlaying(true);
+    }).catch(e => console.log('Audio autoplay prevented'));
     
     return () => {
       audio.pause();
@@ -302,7 +304,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           <p className="text-white/40 uppercase tracking-[0.6em] text-[10px] md:text-xs font-bold mb-10">You are cordially invited</p>
           <h1 className="text-8xl md:text-[14rem] font-serif italic leading-[0.7] tracking-tighter select-none font-black relative">
             <svg 
-              className="w-full h-[120px] md:h-[180px]" 
+              className="w-[90%] h-[120px] md:h-[180px]" 
               viewBox="0 0 600 150" 
               preserveAspectRatio="xMidYMid meet"
             >
@@ -343,7 +345,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
           transition={{ delay: 2, duration: 1 }}
-          className="absolute bottom-12 left-12 flex flex-col items-center gap-4 text-white/30"
+          className="absolute top-12 left-12 flex flex-col items-center gap-4 text-white/30"
         >
           <button 
             onClick={toggleMusic}
@@ -369,7 +371,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
       <div className="max-w-xl md:max-w-2xl mx-auto px-6 space-y-48">
         
         {/* Intro Reveal */}
-        <section className="relative z-10 -mt-24">
+        <section className="relative z-10 mt-12 md:mt-24">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }} 
             whileInView={{ opacity: 1, scale: 1 }} 
