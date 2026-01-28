@@ -332,7 +332,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                 letterSpacing="4"
                 fill="url(#floral)"
                 stroke="white"
-                strokeWidth="1"
+                strokeWidth="1.5"
               >
                 I  DO
               </text>
