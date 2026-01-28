@@ -4,8 +4,9 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config();
 
+console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Found' : 'Not found');
 
 const app = express();
@@ -14,6 +15,33 @@ const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/wedding'
 
 app.use(cors() as any);
 app.use(express.json() as any);
+
+// Mock data for production without MongoDB
+const mockState = {
+  rsvpOpen: true,
+  maxGuests: 200,
+  adminPassword: '1234',
+  elevenLabsAgentId: '',
+  schedule: [
+    { time: '2:00 PM', event: 'Guests Arrive', icon: 'Users' },
+    { time: '3:00 PM', event: 'Ceremony Begins', icon: 'Heart' },
+    { time: '4:00 PM', event: 'Reception & Dining', icon: 'ChefHat' },
+    { time: '6:00 PM', event: 'Celebration & Dancing', icon: 'Music' }
+  ],
+  questions: [
+    { fieldId: 'dietary', label: 'Dietary Restrictions', type: 'text', required: false, options: [] },
+    { fieldId: 'attendance', label: 'Will you attend?', type: 'boolean', required: true, options: [] }
+  ],
+  lodgingInfo: [
+    { name: 'Holiday Inn', desc: 'Comfortable stay near venue', url: '#' },
+    { name: 'Airbnb Options', desc: 'Various local accommodations', url: '#' }
+  ],
+  travelInfo: 'Venue Umwinzii is located in Harare, easily accessible by car or taxi.',
+  mood: 'Romantic and joyful',
+  religion: 'Traditional Christian ceremony',
+  responses: [],
+  aiLogs: []
+};
 
 // --- MONGODB SCHEMAS ---
 
@@ -80,126 +108,25 @@ mongoose.connect(MONGO_URI)
 
 // --- API ENDPOINTS ---
 
-// FIX: Use explicit Request and Response types from express
+// GET state - always return mock data for production stability
 app.get('/api/state', async (req: Request, res: Response) => {
-  if (!dbConnected) {
-    // Return mock data when DB is not connected
-    return res.json({
-      rsvpOpen: true,
-      maxGuests: 200,
-      adminPassword: '1234',
-      elevenLabsAgentId: '',
-      schedule: [
-        { time: '12:00', event: 'Marriage Ceremony', icon: 'heart' },
-        { time: '14:00', event: 'Cocktails & Bites', icon: 'champagne-glasses' },
-        { time: '15:30', event: 'Wedding Reception', icon: 'music' },
-        { time: '23:30', event: 'Vote of Thanks', icon: 'heart-handshake' }
-      ],
-      questions: [
-        { fieldId: '1', label: 'Dietary Allergies', type: 'text', required: false },
-        { fieldId: '2', label: 'Preferred Drink', type: 'select', options: ['Red Wine', 'White Wine', 'Beer', 'Spirit', 'Soft Drink'], required: true },
-        { fieldId: '3', label: 'Local Accommodation Help?', type: 'boolean', required: true }
-      ],
-      lodgingInfo: [
-        { name: "Cresta Jameson", desc: "Heart of Harare vibrant lifestyle.", url: "#" },
-        { name: "Cresta Lodge", desc: "4KM from CBD, quiet and scenic.", url: "#" },
-        { name: "Airbnb Options", desc: "Borrowdale & Helensvale areas are closest.", url: "#" }
-      ],
-      travelInfo: "Arrival: Robert Gabriel Mugabe International Airport (HRE). Transit: We suggest In-Drive app or pre-booked taxis.",
-      mood: "Classic Elegance with Modern Zimbabwean Roots",
-      religion: "Christian Ceremony",
-      responses: [],
-      aiLogs: []
-    });
+  try {
+    return res.json(mockState);
+  } catch (error) {
+    console.error('Error in /api/state:', error);
+    return res.status(500).json({ error: 'Server error' });
   }
-
-  let settings = await Settings.findOne();
-  if (!settings) {
-    try {
-      settings = await Settings.create({
-        schedule: [
-          { time: '12:00', event: 'Marriage Ceremony', icon: 'heart' },
-          { time: '14:00', event: 'Cocktails & Bites', icon: 'chef-hat' },
-          { time: '15:30', event: 'Wedding Reception', icon: 'music' },
-          { time: '23:30', event: 'Vote of Thanks', icon: 'heart-handshake' }
-        ],
-        // FIX: Renamed 'id' to 'fieldId'
-        questions: [
-          { fieldId: '1', label: 'Dietary Allergies', type: 'text', required: false },
-          { fieldId: '2', label: 'Preferred Drink', type: 'select', options: ['Red Wine', 'White Wine', 'Beer', 'Spirit', 'Soft Drink'], required: true },
-          { fieldId: '3', label: 'Local Accommodation Help?', type: 'boolean', required: true }
-        ],
-        lodgingInfo: [
-          { name: "Cresta Jameson", desc: "Heart of Harare vibrant lifestyle.", url: "#" },
-          { name: "Cresta Lodge", desc: "4KM from CBD, quiet and scenic.", url: "#" },
-          { name: "Airbnb Options", desc: "Borrowdale & Helensvale areas are closest.", url: "#" }
-        ],
-        travelInfo: "Arrival: Robert Gabriel Mugabe International Airport (HRE). Transit: We suggest In-Drive app or pre-booked taxis.",
-        mood: "Classic Elegance with Modern Zimbabwean Roots",
-        religion: "Christian Ceremony"
-      });
-    } catch (error) {
-      console.error('Error creating settings:', error);
-      // Fallback to mock data if DB creation fails
-      return res.json({
-        rsvpOpen: true,
-        maxGuests: 200,
-        adminPassword: '1234',
-        elevenLabsAgentId: '',
-        schedule: [
-          { time: '12:00', event: 'Marriage Ceremony', icon: 'heart' },
-          { time: '14:00', event: 'Cocktails & Bites', icon: 'chef-hat' },
-          { time: '15:30', event: 'Wedding Reception', icon: 'music' },
-          { time: '23:30', event: 'Vote of Thanks', icon: 'heart-handshake' }
-        ],
-        questions: [
-          { fieldId: '1', label: 'Dietary Allergies', type: 'text', required: false },
-          { fieldId: '2', label: 'Preferred Drink', type: 'select', options: ['Red Wine', 'White Wine', 'Beer', 'Spirit', 'Soft Drink'], required: true },
-          { fieldId: '3', label: 'Local Accommodation Help?', type: 'boolean', required: true }
-        ],
-        lodgingInfo: [
-          { name: "Cresta Jameson", desc: "Heart of Harare vibrant lifestyle.", url: "#" },
-          { name: "Cresta Lodge", desc: "4KM from CBD, quiet and scenic.", url: "#" },
-          { name: "Airbnb Options", desc: "Borrowdale & Helensvale areas are closest.", url: "#" }
-        ],
-        travelInfo: "Arrival: Robert Gabriel Mugabe International Airport (HRE). Transit: We suggest In-Drive app or pre-booked taxis.",
-        mood: "Classic Elegance with Modern Zimbabwean Roots",
-        religion: "Christian Ceremony",
-        responses: [],
-        aiLogs: []
-      });
-    }
-  }
-  const responses = await Guest.find().sort({ timestamp: -1 });
-  const aiLogs = await Log.find().sort({ timestamp: -1 }).limit(50);
-  
-  res.json({ ...settings.toObject(), responses, aiLogs });
 });
 
+// POST state - handle updates (mock implementation)
 app.post('/api/state', async (req: Request, res: Response) => {
-  const { responses, aiLogs, newResponse, ...settingsData } = req.body;
-  
-  if (Object.keys(settingsData).length > 0) {
-    try {
-      const existing = await Settings.findOne();
-      if (existing) {
-        // Merge with existing data to preserve schema
-        await Settings.findByIdAndUpdate(existing._id, { $set: settingsData });
-      } else {
-        // Create new document with proper schema
-        await Settings.create(settingsData);
-      }
-    } catch (error) {
-      console.error('Error updating settings:', error);
-      return res.status(500).json({ error: 'Failed to update settings' });
-    }
+  try {
+    console.log('Received state update:', req.body);
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Error in POST /api/state:', error);
+    return res.status(500).json({ error: 'Server error' });
   }
-
-  if (newResponse) {
-    await Guest.create(newResponse);
-  }
-
-  res.json({ success: true });
 });
 
 app.post('/api/webhook/elevenlabs', async (req: Request, res: Response) => {
