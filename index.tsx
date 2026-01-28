@@ -332,7 +332,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                 stroke="white"
                 strokeWidth="1"
               >
-                I DO
+                I  DO
               </text>
             </svg>
           </h1>
@@ -345,7 +345,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
           transition={{ delay: 2, duration: 1 }}
-          className="absolute top-12 left-12 flex flex-col items-center gap-4 text-white/30"
+          className="absolute top-12 left-12 flex flex-col items-center gap-4 text-white/30 group"
         >
           <button 
             onClick={toggleMusic}
@@ -353,7 +353,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           >
             {musicPlaying ? <Music size={20} /> : <Music size={20} className="opacity-50" />}
           </button>
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Music</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.4em] opacity-0 group-hover:opacity-100 transition-opacity">Music</span>
         </motion.div>
 
         <motion.div 
@@ -604,7 +604,7 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
     );
   }
 
-  const totals = { guests: Number(state.responses.reduce((a,b) => a + (b.guests || 0), 0)) };
+  const totals = { guests: state.responses.reduce((a,b) => a+b.guests, 0) };
 
   const addQuestion = async () => {
     const q = { fieldId: Date.now().toString(), label: 'New Requirement', type: 'text', required: false };
@@ -614,8 +614,8 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
 
   return (
     <div className="min-h-screen bg-stone-50 font-sans flex flex-col md:flex-row">
-      <nav className="w-full md:w-80 bg-stone-900 text-white p-6 md:p-12 flex flex-col">
-        <div className="flex items-center gap-3 mb-12 md:mb-24"><Zap size={28} /><h1 className="text-xl md:text-2xl font-serif italic">Registry OS</h1></div>
+      <nav className="w-full md:w-80 bg-stone-900 text-white p-12 flex flex-col">
+        <div className="flex items-center gap-3 mb-24"><Zap size={28} /><h1 className="text-2xl font-serif italic">Registry OS</h1></div>
         <div className="space-y-4 flex-1">
           {[
             { id: 'overview', icon: Coffee, label: 'Stats' },
@@ -624,22 +624,22 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
             { id: 'logs', icon: ShieldCheck, label: 'AI Activity' },
             { id: 'settings', icon: Settings, label: 'Core Setup' }
           ].map(p => (
-            <button key={p.id} onClick={() => setPanel(p.id as any)} className={`w-full text-left p-4 md:p-6 rounded-[2rem] flex items-center gap-4 transition-all ${panel === p.id ? 'bg-white text-stone-900 font-bold shadow-xl' : 'text-stone-500 hover:text-white'}`}>
+            <button key={p.id} onClick={() => setPanel(p.id as any)} className={`w-full text-left p-6 rounded-[2rem] flex items-center gap-4 transition-all ${panel === p.id ? 'bg-white text-stone-900 font-bold shadow-xl' : 'text-stone-500 hover:text-white'}`}>
               <p.icon size={20} /> {p.label}
             </button>
           ))}
         </div>
-        <div className="mt-12 md:mt-20 p-4 md:p-8 bg-white/5 rounded-[3rem] border border-white/5">
-          <p className="text-[10px] md:text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 md:mb-4">Capacity</p>
-          <div className="h-2 md:h-2 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-white" style={{ width: `${Math.min(100, (totals.guests/state.maxGuests)*100)}%` }} /></div>
-          <p className="text-sm md:text-sm mt-2 md:mt-3 font-medium">{totals.guests} / {state.maxGuests}</p>
+        <div className="mt-20 p-8 bg-white/5 rounded-[3rem] border border-white/5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-4">Capacity</p>
+          <div className="h-2 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-white" style={{ width: `${Math.min(100, (totals.guests/state.maxGuests)*100)}%` }} /></div>
+          <p className="text-sm mt-3 font-medium">{totals.guests} / {state.maxGuests}</p>
         </div>
       </nav>
 
-      <main className="flex-1 p-6 md:p-12 lg:p-24 overflow-y-auto">
-        <header className="flex justify-between items-center mb-12 md:mb-20">
-          <h2 className="text-4xl md:text-6xl font-serif italic capitalize">{panel}</h2>
-          <button onClick={() => API.updateState({ rsvpOpen: !state.rsvpOpen }).then(refresh)} className={`px-6 md:px-12 py-4 md:py-5 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm ${state.rsvpOpen ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+      <main className="flex-1 p-12 md:p-24 overflow-y-auto">
+        <header className="flex justify-between items-center mb-20">
+          <h2 className="text-6xl font-serif italic capitalize">{panel}</h2>
+          <button onClick={() => API.updateState({ rsvpOpen: !state.rsvpOpen }).then(refresh)} className={`px-12 py-5 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm ${state.rsvpOpen ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
             Status: {state.rsvpOpen ? 'Open' : 'Closed'}
           </button>
         </header>
@@ -729,16 +729,16 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-4">
                 <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">Max Capacity</label>
-                <input type="number" value={state.maxGuests} onChange={e => API.updateState({maxGuests: parseInt(e.target.value)}).then(refresh)} className="w-full bg-stone-50 p-4 md:p-7 rounded-[2.5rem] border-none" />
+                <input type="number" value={state.maxGuests} onChange={e => API.updateState({maxGuests: parseInt(e.target.value)}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none" />
               </div>
               <div className="space-y-4">
                 <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">Dashboard Key</label>
-                <input value={state.adminPassword} onChange={e => API.updateState({adminPassword: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-4 md:p-7 rounded-[2.5rem] border-none" />
+                <input value={state.adminPassword} onChange={e => API.updateState({adminPassword: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none" />
               </div>
             </div>
             <div className="space-y-4">
               <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">Precision Mood</label>
-              <textarea value={state.mood} onChange={e => API.updateState({mood: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-4 md:p-7 rounded-[2.5rem] border-none h-32" />
+              <textarea value={state.mood} onChange={e => API.updateState({mood: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none h-32" />
             </div>
           </div>
         )}
