@@ -301,8 +301,8 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="relative z-10 text-center px-6"
         >
-          <p className="text-white/40 uppercase tracking-[0.6em] text-[10px] md:text-xs font-bold mb-10">You are cordially invited</p>
-          <h1 className="text-8xl md:text-[14rem] font-serif italic leading-[0.7] tracking-tighter select-none font-black relative">
+          <p className="text-white/40 uppercase tracking-[0.6em] text-[10px] md:text-xs font-bold mb-10">Join us as we say</p>
+          <h1 className="text-8xl md:text-[14rem] font-bold font-serif tracking-tighter select-none font-black relative">
             <svg 
               className="w-[90%] h-[120px] md:h-[180px]" 
               viewBox="0 0 600 150" 
@@ -371,7 +371,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
       <div className="max-w-xl md:max-w-2xl mx-auto px-6 space-y-48">
         
         {/* Intro Reveal */}
-        <section className="relative z-10 mt-12 md:mt-24">
+        <section className="relative z-10 -mt-24">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }} 
             whileInView={{ opacity: 1, scale: 1 }} 
@@ -614,8 +614,8 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
 
   return (
     <div className="min-h-screen bg-stone-50 font-sans flex flex-col md:flex-row">
-      <nav className="w-full md:w-80 bg-stone-900 text-white p-12 flex flex-col">
-        <div className="flex items-center gap-3 mb-24"><Zap size={28} /><h1 className="text-2xl font-serif italic">Registry OS</h1></div>
+      <nav className="w-full md:w-80 bg-stone-900 text-white p-6 md:p-12 flex flex-col">
+        <div className="flex items-center gap-3 mb-12 md:mb-24"><Zap size={28} /><h1 className="text-xl md:text-2xl font-serif italic">Registry OS</h1></div>
         <div className="space-y-4 flex-1">
           {[
             { id: 'overview', icon: Coffee, label: 'Stats' },
@@ -624,22 +624,22 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
             { id: 'logs', icon: ShieldCheck, label: 'AI Activity' },
             { id: 'settings', icon: Settings, label: 'Core Setup' }
           ].map(p => (
-            <button key={p.id} onClick={() => setPanel(p.id as any)} className={`w-full text-left p-6 rounded-[2rem] flex items-center gap-4 transition-all ${panel === p.id ? 'bg-white text-stone-900 font-bold shadow-xl' : 'text-stone-500 hover:text-white'}`}>
+            <button key={p.id} onClick={() => setPanel(p.id as any)} className={`w-full text-left p-4 md:p-6 rounded-[2rem] flex items-center gap-4 transition-all ${panel === p.id ? 'bg-white text-stone-900 font-bold shadow-xl' : 'text-stone-500 hover:text-white'}>
               <p.icon size={20} /> {p.label}
             </button>
           ))}
         </div>
-        <div className="mt-20 p-8 bg-white/5 rounded-[3rem] border border-white/5">
+        <div className="mt-12 md:mt-20 p-4 md:p-8 bg-white/5 rounded-[3rem] border border-white/5">
           <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-4">Capacity</p>
           <div className="h-2 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-white" style={{ width: `${Math.min(100, (totals.guests/state.maxGuests)*100)}%` }} /></div>
           <p className="text-sm mt-3 font-medium">{totals.guests} / {state.maxGuests}</p>
         </div>
       </nav>
 
-      <main className="flex-1 p-12 md:p-24 overflow-y-auto">
-        <header className="flex justify-between items-center mb-20">
-          <h2 className="text-6xl font-serif italic capitalize">{panel}</h2>
-          <button onClick={() => API.updateState({ rsvpOpen: !state.rsvpOpen }).then(refresh)} className={`px-12 py-5 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm ${state.rsvpOpen ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+      <main className="flex-1 p-6 md:p-12 lg:p-24 overflow-y-auto">
+        <header className="flex justify-between items-center mb-12 md:mb-20">
+          <h2 className="text-4xl md:text-6xl font-serif italic capitalize">{panel}</h2>
+          <button onClick={() => API.updateState({ rsvpOpen: !state.rsvpOpen }).then(refresh)} className={`px-6 md:px-12 py-4 md:py-5 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm ${state.rsvpOpen ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
             Status: {state.rsvpOpen ? 'Open' : 'Closed'}
           </button>
         </header>
@@ -729,16 +729,16 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-4">
                 <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">Max Capacity</label>
-                <input type="number" value={state.maxGuests} onChange={e => API.updateState({maxGuests: parseInt(e.target.value)}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none" />
+                <input type="number" value={state.maxGuests} onChange={e => API.updateState({maxGuests: parseInt(e.target.value)}).then(refresh)} className="w-full bg-stone-50 p-4 md:p-7 rounded-[2.5rem] border-none" />
               </div>
               <div className="space-y-4">
                 <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">Dashboard Key</label>
-                <input value={state.adminPassword} onChange={e => API.updateState({adminPassword: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none" />
+                <input value={state.adminPassword} onChange={e => API.updateState({adminPassword: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-4 md:p-7 rounded-[2.5rem] border-none" />
               </div>
             </div>
             <div className="space-y-4">
               <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">Precision Mood</label>
-              <textarea value={state.mood} onChange={e => API.updateState({mood: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none h-32" />
+              <textarea value={state.mood} onChange={e => API.updateState({mood: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-4 md:p-7 rounded-[2.5rem] border-none h-32" />
             </div>
           </div>
         )}
