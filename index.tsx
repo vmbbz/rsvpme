@@ -229,10 +229,8 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
     audio.volume = 0.3;
     audioRef.current = audio;
     
-    // Try to autoplay
-    audio.play().then(() => {
-      setMusicPlaying(true);
-    }).catch(e => console.log('Audio autoplay prevented'));
+    // Set initial state to false - don't autoplay
+    setMusicPlaying(false);
     
     return () => {
       audio.pause();
