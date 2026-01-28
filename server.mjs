@@ -1,5 +1,5 @@
 
-import express, { Request, Response } from 'express';
+import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -13,8 +13,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/wedding';
 
-app.use(cors() as any);
-app.use(express.json() as any);
+app.use(cors());
+app.use(express.json());
 
 // Mock data for production without MongoDB
 const mockState = {
@@ -109,7 +109,7 @@ mongoose.connect(MONGO_URI)
 // --- API ENDPOINTS ---
 
 // GET state - try MongoDB first, fallback to mock
-app.get('/api/state', async (req: Request, res: Response) => {
+app.get('/api/state', async (req, res) => {
   try {
     if (dbConnected) {
       let settings = await Settings.findOne();
@@ -159,7 +159,7 @@ app.get('/api/state', async (req: Request, res: Response) => {
 });
 
 // POST state - handle updates with MongoDB
-app.post('/api/state', async (req: Request, res: Response) => {
+app.post('/api/state', async (req, res) => {
   try {
     if (dbConnected) {
       const { responses, aiLogs, newResponse, ...settingsData } = req.body;
@@ -185,7 +185,7 @@ app.post('/api/state', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/api/webhook/elevenlabs', async (req: Request, res: Response) => {
+app.post('/api/webhook/elevenlabs', async (req, res) => {
   const { tool_name, parameters } = req.body;
   const settings = await Settings.findOne();
 
