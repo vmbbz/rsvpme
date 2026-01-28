@@ -302,14 +302,39 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           className="relative z-10 text-center px-6"
         >
           <p className="text-white/40 uppercase tracking-[0.6em] text-[10px] md:text-xs font-bold mb-10">You are cordially invited</p>
-          <h1 className="text-8xl md:text-[14rem] font-serif italic leading-[0.7] tracking-tighter select-none font-black">
-            <span className="inline-block bg-cover bg-bottom text-transparent bg-clip-text stroke-white stroke-1" 
-                  style={{ 
-                    backgroundImage: 'url(https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=1200)',
-                    WebkitTextStroke: '1px white'
-                  }}>
-              I DO
-            </span>
+          <h1 className="text-8xl md:text-[14rem] font-serif italic leading-[0.7] tracking-tighter select-none font-black relative">
+            <svg 
+              className="w-full h-[120px] md:h-[180px]" 
+              viewBox="0 0 600 150" 
+              preserveAspectRatio="xMidYMid meet"
+            >
+              <defs>
+                <pattern id="floral" patternUnits="userSpaceOnUse" width="800" height="200">
+                  <image 
+                    href="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=1200" 
+                    x="0" 
+                    y="0" 
+                    width="800" 
+                    height="200" 
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+                </pattern>
+              </defs>
+              <text 
+                x="300" 
+                y="75" 
+                dominantBaseline="middle" 
+                textAnchor="middle" 
+                className="font-black"
+                fontSize="160"
+                fontFamily="Playfair Display, Georgia, serif"
+                fill="url(#floral)"
+                stroke="white"
+                strokeWidth="1"
+              >
+                I DO
+              </text>
+            </svg>
           </h1>
           <div className="h-px w-24 bg-white/20 mx-auto my-12" />
           <h2 className="text-white text-3xl md:text-5xl font-serif italic mt-6">Geraldine <span className="text-yellow-300">&</span> Bright</h2>
