@@ -1,0 +1,7 @@
+{
+  "name": "I DO - Bright & Geraldine",
+  "description": "High-end wedding invitation and RSVP management app with AI Concierge.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
