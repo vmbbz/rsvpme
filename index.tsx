@@ -33,7 +33,7 @@ type AppState = {
  * API SERVICE
  */
 const API = {
-  baseUrl: 'http://localhost:3001/api',
+  baseUrl: process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3001/api',
   async getState(): Promise<AppState> {
     const res = await fetch(`${this.baseUrl}/state`);
     return res.json();

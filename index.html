@@ -6,18 +6,21 @@
     <title>Geraldine & Bright Wedding Invitation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              serif: ['"Bodoni Moda"', 'serif'],
-              sans: ['"Outfit"', 'sans-serif'],
-            },
-            colors: {
-              stone: { 50: '#fdfcf9' }
+      // Only use CDN in development
+      if (window.location.hostname === 'localhost') {
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                serif: ['"Bodoni Moda"', 'serif'],
+                sans: ['"Outfit"', 'sans-serif'],
+              },
+              colors: {
+                stone: { 50: '#fdfcf9' }
+              }
             }
           }
-        }
+        };
       }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
