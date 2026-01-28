@@ -301,10 +301,10 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="relative z-10 text-center px-6"
         >
-          <p className="text-white/40 uppercase tracking-[0.6em] text-[10px] md:text-xs font-bold mb-10">Join us as we say</p>
-          <h1 className="text-8xl md:text-[14rem] font-bold font-serif tracking-tighter select-none font-black relative">
+          <p className="text-white/60 uppercase tracking-[0.6em] text-[10px] md:text-xs font-bold mb-10">Join us as we say</p>
+          <h1 className="text-8xl md:text-[14rem] font-bold font-serif tracking-tighter select-none font-black relative text-center">
             <svg 
-              className="w-[90%] h-[120px] md:h-[180px]" 
+              className="w-[90%] h-[120px] md:h-[180px] mx-auto" 
               viewBox="0 0 600 150" 
               preserveAspectRatio="xMidYMid meet"
             >
@@ -322,12 +322,14 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               </defs>
               <text 
                 x="300" 
-                y="75" 
-                dominantBaseline="middle" 
+                y="85" 
+                dominantBaseline="central" 
                 textAnchor="middle" 
                 className="font-black"
-                fontSize="160"
-                fontFamily="Playfair Display, Georgia, serif"
+                fontSize="140"
+                fontFamily="Cormorant Garamond, Playfair Display, Georgia, serif"
+                fontWeight="700"
+                letterSpacing="4"
                 fill="url(#floral)"
                 stroke="white"
                 strokeWidth="1"
