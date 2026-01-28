@@ -36,7 +36,7 @@ const mockState = {
     { name: 'Holiday Inn', desc: 'Comfortable stay near venue', url: '#' },
     { name: 'Airbnb Options', desc: 'Various local accommodations', url: '#' }
   ],
-  travelInfo: 'Venue Umwinzii is located in Harare, easily accessible by car or taxi.',
+  travelInfo: "Arrival: Robert Gabriel Mugabe International Airport (HRE). Transit: We suggest In-Drive app or pre-booked taxis. Venue Umwinzii is located in Harare, easily accessible by car or taxi.",
   mood: 'Romantic and joyful',
   religion: 'Traditional Christian ceremony',
   responses: [],
