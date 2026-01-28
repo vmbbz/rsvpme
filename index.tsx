@@ -219,6 +219,39 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
     return () => clearInterval(timer);
   }, []);
 
+  // Auto-play wedding music
+  const [musicPlaying, setMusicPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio('https://www.bensound.com/bensound-music/bensound-romantic.mp3');
+    audio.loop = true;
+    audio.volume = 0.3;
+    audioRef.current = audio;
+    
+    // Try to autoplay
+    audio.play().then(() => {
+      setMusicPlaying(true);
+    }).catch(e => console.log('Audio autoplay prevented'));
+    
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (musicPlaying) {
+        audioRef.current.pause();
+        setMusicPlaying(false);
+      } else {
+        audioRef.current.play();
+        setMusicPlaying(true);
+      }
+    }
+  };
+
   const getJourneyImage = (index: number) => {
     // Try .jpeg first since that's what you have
     return `/images/hero-${index + 1}.jpeg`;
@@ -281,6 +314,21 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           <div className="h-px w-24 bg-white/20 mx-auto my-12" />
           <h2 className="text-white text-3xl md:text-5xl font-serif italic mt-6">Geraldine <span className="text-yellow-300">&</span> Bright</h2>
           <p className="text-white/60 text-[11px] mt-6 tracking-[0.4em] font-bold uppercase">DECEMBER 17, 2026 • HARARE</p>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          transition={{ delay: 2, duration: 1 }}
+          className="absolute bottom-12 left-12 flex flex-col items-center gap-4 text-white/30"
+        >
+          <button 
+            onClick={toggleMusic}
+            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all"
+          >
+            {musicPlaying ? <Music size={20} /> : <Music size={20} className="opacity-50" />}
+          </button>
+          <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Music</span>
         </motion.div>
 
         <motion.div 
