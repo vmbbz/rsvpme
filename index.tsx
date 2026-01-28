@@ -604,7 +604,7 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
     );
   }
 
-  const totals = { guests: state.responses.reduce((a,b) => a+b.guests, 0) };
+  const totals = { guests: Number(state.responses.reduce((a,b) => a + (b.guests || 0), 0)) };
 
   const addQuestion = async () => {
     const q = { fieldId: Date.now().toString(), label: 'New Requirement', type: 'text', required: false };
@@ -624,7 +624,7 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
             { id: 'logs', icon: ShieldCheck, label: 'AI Activity' },
             { id: 'settings', icon: Settings, label: 'Core Setup' }
           ].map(p => (
-            <button key={p.id} onClick={() => setPanel(p.id as any)} className={`w-full text-left p-4 md:p-6 rounded-[2rem] flex items-center gap-4 transition-all ${panel === p.id ? 'bg-white text-stone-900 font-bold shadow-xl' : 'text-stone-500 hover:text-white'}>
+            <button key={p.id} onClick={() => setPanel(p.id as any)} className={`w-full text-left p-4 md:p-6 rounded-[2rem] flex items-center gap-4 transition-all ${panel === p.id ? 'bg-white text-stone-900 font-bold shadow-xl' : 'text-stone-500 hover:text-white'}`}>
               <p.icon size={20} /> {p.label}
             </button>
           ))}
