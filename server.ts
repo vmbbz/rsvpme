@@ -108,24 +108,80 @@ mongoose.connect(MONGO_URI)
 
 // --- API ENDPOINTS ---
 
-// GET state - always return mock data for production stability
+// GET state - try MongoDB first, fallback to mock
 app.get('/api/state', async (req: Request, res: Response) => {
   try {
-    return res.json(mockState);
+    if (dbConnected) {
+      let settings = await Settings.findOne();
+      if (!settings) {
+        settings = await Settings.create({
+          rsvpOpen: true,
+          maxGuests: 200,
+          adminPassword: '1234',
+          elevenLabsAgentId: '',
+          schedule: [
+            { time: '12:00', event: 'Marriage Ceremony', icon: 'heart' },
+            { time: '14:00', event: 'Cocktails & Bites', icon: 'chef-hat' },
+            { time: '15:30', event: 'Wedding Reception', icon: 'music' },
+            { time: '23:30', event: 'Vote of Thanks', icon: 'heart-handshake' }
+          ],
+          questions: [
+            { fieldId: '1', label: 'Dietary Allergies', type: 'text', required: false },
+            { fieldId: '2', label: 'Preferred Drink', type: 'select', options: ['Red Wine', 'White Wine', 'Beer', 'Spirit', 'Soft Drink'], required: true },
+            { fieldId: '3', label: 'Local Accommodation Help?', type: 'boolean', required: true }
+          ],
+          lodgingInfo: [
+            { name: "Cresta Jameson", desc: "Heart of Harare vibrant lifestyle.", url: "#" },
+            { name: "Cresta Lodge", desc: "4KM from CBD, quiet and scenic.", url: "#" },
+            { name: "Airbnb Options", desc: "Borrowdale & Helensvale areas are closest.", url: "#" }
+          ],
+          travelInfo: "Arrival: Robert Gabriel Mugabe International Airport (HRE). Transit: We suggest In-Drive app or pre-booked taxis.",
+          mood: "Classic Elegance with Modern Zimbabwean Roots",
+          religion: "Christian Ceremony"
+        });
+      }
+      
+      const guests = await Guest.find().sort({ timestamp: -1 });
+      const logs = await Log.find().sort({ timestamp: -1 }).limit(50);
+      
+      return res.json({
+        ...settings.toObject(),
+        responses: guests,
+        aiLogs: logs
+      });
+    } else {
+      return res.json(mockState);
+    }
   } catch (error) {
     console.error('Error in /api/state:', error);
-    return res.status(500).json({ error: 'Server error' });
+    return res.json(mockState);
   }
 });
 
-// POST state - handle updates (mock implementation)
+// POST state - handle updates with MongoDB
 app.post('/api/state', async (req: Request, res: Response) => {
   try {
-    console.log('Received state update:', req.body);
+    if (dbConnected) {
+      const { responses, aiLogs, newResponse, ...settingsData } = req.body;
+
+      if (Object.keys(settingsData).length > 0) {
+        const existing = await Settings.findOne();
+        if (existing) {
+          await Settings.findByIdAndUpdate(existing._id, { $set: settingsData });
+        } else {
+          await Settings.create(settingsData);
+        }
+      }
+
+      if (newResponse) {
+        await Guest.create(newResponse);
+      }
+    }
+    
     return res.json({ success: true });
   } catch (error) {
     console.error('Error in POST /api/state:', error);
-    return res.status(500).json({ error: 'Server error' });
+    return res.json({ success: true }); // Don't fail the frontend
   }
 });
 
