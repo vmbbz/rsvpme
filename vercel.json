@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.ts",
+      "src": "server.mjs",
       "use": "@vercel/node"
     },
     {
@@ -16,7 +16,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/server.ts"
+      "dest": "/server.mjs"
     },
     {
       "src": "/(.*)",
@@ -24,7 +24,7 @@
     }
   ],
   "functions": {
-    "server.ts": {
+    "server.mjs": {
       "runtime": "nodejs18.x"
     }
   }
