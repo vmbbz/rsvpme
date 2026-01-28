@@ -326,15 +326,15 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                 dominantBaseline="central" 
                 textAnchor="middle" 
                 className="font-black"
-                fontSize="140"
+                fontSize="160"
                 fontFamily="Cormorant Garamond, Playfair Display, Georgia, serif"
                 fontWeight="700"
-                letterSpacing="4"
+                letterSpacing="0"
                 fill="url(#floral)"
                 stroke="white"
                 strokeWidth="1.5"
               >
-                I  DO
+                I DO
               </text>
             </svg>
           </h1>
