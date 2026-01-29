@@ -129,12 +129,12 @@ const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) =
   return (
     <div className="space-y-16 py-20 relative">
       <div className="flex items-center gap-6 mb-16 px-4">
-        <div className="p-4 rounded-full bg-vintage-cream border border-vintage-tan shadow-sm">
-          <Clock className="text-vintage-plum" size={24} />
+        <div className="p-4 rounded-full shadow-sm" style={{backgroundColor: '#fdfcfb', borderColor: '#c4a57b'}}>
+          <Clock style={{color: '#2a1a2a'}} size={24} />
         </div>
         <div>
-          <h3 className="text-5xl md:text-6xl font-serif italic text-vintage-plum">The Celebration</h3>
-          <p className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-tan mt-3">A Chronicle of Joy</p>
+          <h3 className="text-5xl md:text-6xl font-serif italic" style={{color: '#2a1a2a'}}>The Celebration</h3>
+          <p className="text-[11px] font-bold uppercase tracking-[0.5em] mt-3" style={{color: '#c4a57b'}}>A Chronicle of Joy</p>
         </div>
       </div>
       
@@ -337,21 +337,22 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
   };
 
   return (
-    <div className="bg-vintage-bg min-h-screen font-sans text-vintage-plum pb-40 overflow-x-hidden selection:bg-vintage-plum selection:text-white">
+    <div className="min-h-screen font-sans pb-40 overflow-x-hidden" style={{backgroundColor: '#f5f0e8', color: '#2a1a2a', selectionBackgroundColor: '#2a1a2a', selectionColor: '#ffffff'}}>
       
       {/* Editorial Hero - PLUM TEXT ON LILAC BG */}
-      <section className="relative h-screen w-full overflow-hidden bg-vintage-bg flex flex-col items-center justify-start py-8 md:py-12">
+      <section className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-start py-8 md:py-12" style={{backgroundColor: '#f5f0e8'}}>
         {/* Top Control Bar - Music at Top */}
         <div className="relative z-50 w-full max-w-5xl flex justify-between items-center px-12 mb-12">
-           <button onClick={toggleMusic} className="w-14 h-14 rounded-full bg-vintage-cream/80 border-2 border-vintage-tan flex items-center justify-center hover:bg-vintage-tan hover:text-white transition-all shadow-lux group">
-              <Music size={24} className={musicPlaying ? "text-vintage-plum group-hover:text-white" : "text-vintage-plum/40"} />
+           <button onClick={toggleMusic} className="w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lux group" style={{backgroundColor: 'rgba(253, 252, 251, 0.8)', borderColor: '#c4a57b'}}>
+              <Music size={24} style={{color: musicPlaying ? '#2a1a2a' : 'rgba(42, 26, 42, 0.4)'}} />
            </button>
            <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowRSVP(true)} 
               disabled={!state.rsvpOpen}
-              className={`py-4 px-10 rounded-full shadow-lux font-bold tracking-[0.4em] uppercase text-[10px] flex items-center justify-center gap-4 transition-all border-2 ${state.rsvpOpen ? 'bg-vintage-plum text-white border-vintage-tan' : 'bg-vintage-cream text-vintage-plum/40 border-vintage-plum/10 cursor-not-allowed'}`}
+              className={`py-4 px-10 rounded-full shadow-lux font-bold tracking-[0.4em] uppercase text-[10px] flex items-center justify-center gap-4 transition-all border-2 ${state.rsvpOpen ? '' : 'cursor-not-allowed'}`}
+              style={{backgroundColor: state.rsvpOpen ? '#2a1a2a' : '#fdfcfb', color: state.rsvpOpen ? '#ffffff' : 'rgba(42, 26, 42, 0.4)', borderColor: '#c4a57b'}}
             >
               {state.rsvpOpen ? <><Zap size={16} fill="currentColor" /> RSVP</> : 'CLOSED'}
             </motion.button>
@@ -379,10 +380,10 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="relative z-10 text-center px-6 max-w-5xl flex flex-col items-center mt-8 md:mt-0"
         >
-          <p className="text-vintage-plum font-serif italic text-lg md:text-2xl mb-12 leading-relaxed text-visible-edge">
+          <p className="font-serif italic text-lg md:text-2xl mb-12 leading-relaxed" style={{color: '#2a1a2a'}}>
             “I have found the one whom my soul loves”
             <br/>
-            <span className="text-[11px] font-bold uppercase tracking-[0.6em] text-vintage-plum mt-5 inline-block drop-shadow-md">— Song of Solomon 3:4</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.6em] mt-5 inline-block" style={{color: '#2a1a2a'}}>— Song of Solomon 3:4</span>
           </p>
 
           <div className="relative mb-12 flex flex-col items-center">
