@@ -15,39 +15,38 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      if (window.location.hostname === 'localhost' || window.location.hostname.includes('webcontainer')) {
-        tailwind.config = {
-          theme: {
-            extend: {
-              fontFamily: {
-                serif: ['"Bodoni Moda"', 'serif'],
-                sans: ['"Outfit"', 'sans-serif'],
+      // Surgically removed the hostname check to ensure theme colors work on all devices/domains
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              serif: ['"Bodoni Moda"', 'serif'],
+              sans: ['"Outfit"', 'sans-serif'],
+            },
+            colors: {
+              // Exact tones sampled from the original design
+              'vintage-bg': '#d5c0d5',      // Soft Lilac Background
+              'vintage-plum': '#6a4a6a',    // Deep Plum for main text
+              'vintage-tan': '#b89c8e',     // Muted Tan for borders
+              'vintage-cream': '#e8dcd5',   // Creamy Tan for highlights
+              'vintage-muted': '#a68ca6',   // Muted Lilac for secondary text
+              lilac: {
+                50: '#f9f6f9',
+                100: '#f3ecf3',
+                200: '#e8dce8',
+                300: '#d5c0d5',
+                400: '#c8b4c8',
+                500: '#a68ca6',
+                600: '#8a6e8a',
+                700: '#6a4a6a',
+                800: '#4a3a4a',
+                900: '#2a1a2a',
+                950: '#1a0a1a',
               },
-              colors: {
-                // Colors extracted exactly from the provided circle strip
-                'vintage-bg': '#d5c0d5',      // Top Circle: Soft Lilac Background
-                'vintage-plum': '#6a4a6a',    // Middle Circle: Deep Plum for main text/accents
-                'vintage-tan': '#b89c8e',     // Bottom Circle: Brown/Tan for borders and luxury effects
-                'vintage-cream': '#e8dcd5',   // 4th Circle: Creamy Tan for subtle card backgrounds
-                'vintage-muted': '#a68ca6',   // 2nd Circle: Muted Lilac for secondary elements
-                lilac: {
-                  50: '#f9f6f9',
-                  100: '#f3ecf3',
-                  200: '#e8dce8',
-                  300: '#d5c0d5',
-                  400: '#c8b4c8',
-                  500: '#a68ca6',
-                  600: '#8a6e8a',
-                  700: '#6a4a6a',
-                  800: '#4a3a4a',
-                  900: '#2a1a2a',
-                  950: '#1a0a1a',
-                },
-              }
             }
           }
-        };
-      }
+        }
+      };
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
