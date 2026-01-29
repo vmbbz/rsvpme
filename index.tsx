@@ -252,9 +252,39 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const audio = new Audio('https://drive.google.com/uc?export=download&id=1yY17dlyaevmVSWcJ_p4Ubg7pAOPAmCjr');
+    // Try multiple sources in order of preference
+    const audioSources = [
+      '/audio/wedding-music.mp3', // Local file (best option)
+      'https://www.bensound.com/bensound-music/bensound-romantic.mp3' // Fallback
+    ];
+    
+    const audio = new Audio();
     audio.loop = true;
     audio.volume = 0.25;
+    
+    let currentSourceIndex = 0;
+    
+    const tryNextSource = () => {
+      if (currentSourceIndex < audioSources.length) {
+        console.log(`Trying audio source ${currentSourceIndex + 1}: ${audioSources[currentSourceIndex]}`);
+        audio.src = audioSources[currentSourceIndex];
+        currentSourceIndex++;
+      } else {
+        console.log('All audio sources failed');
+      }
+    };
+    
+    audio.addEventListener('error', () => {
+      console.log(`Audio source ${currentSourceIndex} failed, trying next...`);
+      tryNextSource();
+    });
+    
+    audio.addEventListener('canplay', () => {
+      console.log(`Audio loaded successfully from: ${audio.src}`);
+    });
+    
+    // Start with first source
+    tryNextSource();
     audioRef.current = audio;
     
     // Preload the audio
