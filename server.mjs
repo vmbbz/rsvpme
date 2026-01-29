@@ -6,44 +6,14 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Found' : 'Not found');
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/wedding';
 
 app.use(cors());
-app.use(express.json());
-
-// Mock data for production without MongoDB
-const mockState = {
-  rsvpOpen: true,
-  maxGuests: 200,
-  adminPassword: '1234',
-  elevenLabsAgentId: '',
-  schedule: [
-    { time: '2:00 PM', event: 'Guests Arrive', icon: 'Users' },
-    { time: '3:00 PM', event: 'Ceremony Begins', icon: 'Heart' },
-    { time: '4:00 PM', event: 'Reception & Dining', icon: 'ChefHat' },
-    { time: '6:00 PM', event: 'Celebration & Dancing', icon: 'Music' }
-  ],
-  questions: [
-    { fieldId: 'dietary', label: 'Dietary Restrictions', type: 'text', required: false, options: [] },
-    { fieldId: 'attendance', label: 'Will you attend?', type: 'boolean', required: true, options: [] }
-  ],
-  lodgingInfo: [
-    { name: 'Holiday Inn', desc: 'Comfortable stay near venue', url: '#' },
-    { name: 'Airbnb Options', desc: 'Various local accommodations', url: '#' }
-  ],
-  travelInfo: "Arrival: Robert Gabriel Mugabe International Airport (HRE). Transit: We suggest In-Drive app or pre-booked taxis. Venue Umwinzii is located in Harare, easily accessible by car or taxi.",
-  mood: 'Romantic and joyful',
-  religion: 'Traditional Christian ceremony',
-  responses: [],
-  aiLogs: []
-};
-
-// --- MONGODB SCHEMAS ---
+// Fixed: Explicitly provide a path to resolve the "NextHandleFunction not assignable to PathParams" type error
+// This ensures the middleware is correctly matched to the RequestHandler parameter in Express overloads.
+app.use('/', express.json());
 
 const QuestionSchema = new mongoose.Schema({
   fieldId: { type: String, required: true },
@@ -58,7 +28,7 @@ const SettingsSchema = new mongoose.Schema({
   maxGuests: { type: Number, default: 200 },
   adminPassword: { type: String, default: '1234' },
   elevenLabsAgentId: { type: String, default: '' },
-  schedule: [{ time: String, event: String, icon: String }],
+  schedule: [{ time: String, event: String, icon: String, detail: String }],
   questions: [QuestionSchema],
   lodgingInfo: [{ name: String, desc: String, url: String }],
   travelInfo: String,
@@ -82,33 +52,31 @@ const LogSchema = new mongoose.Schema({
   timestamp: { type: Number, default: Date.now },
 });
 
+const AdminLogSchema = new mongoose.Schema({
+  action: String,
+  field: String, 
+  oldValue: String,
+  newValue: String,
+  timestamp: { type: Number, default: Date.now },
+  userAgent: String,
+  ip: String
+});
+
 const Settings = mongoose.model('Settings', SettingsSchema);
 const Guest = mongoose.model('Guest', GuestSchema);
 const Log = mongoose.model('Log', LogSchema);
+const AdminLog = mongoose.model('AdminLog', AdminLogSchema);
 
-// --- DB CONNECTION ---
 let dbConnected = false;
 mongoose.connect(MONGO_URI)
-  .then(async () => {
+  .then(() => {
     console.log('Connected to MongoDB Atlas');
     dbConnected = true;
-    
-    // Drop the entire collection to clear all bad data
-    try {
-      await Settings.collection.drop();
-      console.log('Dropped Settings collection');
-    } catch (err) {
-      console.log('Collection does not exist, will create new one');
-    }
   })
   .catch(err => {
     console.error('Mongo Connection Error:', err);
-    console.log('Running without database - using in-memory storage');
   });
 
-// --- API ENDPOINTS ---
-
-// GET state - try MongoDB first, fallback to mock
 app.get('/api/state', async (req, res) => {
   try {
     if (dbConnected) {
@@ -116,104 +84,89 @@ app.get('/api/state', async (req, res) => {
       if (!settings) {
         settings = await Settings.create({
           rsvpOpen: true,
-          maxGuests: 200,
+          maxGuests: 250,
           adminPassword: '1234',
           elevenLabsAgentId: '',
           schedule: [
-            { time: '12:00', event: 'Marriage Ceremony', icon: 'heart' },
-            { time: '14:00', event: 'Cocktails & Bites', icon: 'chef-hat' },
-            { time: '15:30', event: 'Wedding Reception', icon: 'music' },
-            { time: '23:30', event: 'Vote of Thanks', icon: 'heart-handshake' }
+            { time: '12:00 PM', event: 'Wedding Ceremony', icon: 'heart', detail: 'The exchange of vows and rings in the presence of God and loved ones.' },
+            { time: '02:00 PM', event: 'Photography & Cocktails', icon: 'chef-hat', detail: 'Enjoy refreshments as we capture memories in the gardens.' },
+            { time: '03:30 PM', event: 'Wedding Reception', icon: 'music', detail: 'A celebratory feast with music, dancing, and heartfelt toasts.' },
+            { time: '08:00 PM', event: 'First Dance & Celebration', icon: 'heart-handshake', detail: 'The party begins in earnest! Let the celebration continue.' }
           ],
           questions: [
-            { fieldId: '1', label: 'Dietary Allergies', type: 'text', required: false },
-            { fieldId: '2', label: 'Preferred Drink', type: 'select', options: ['Red Wine', 'White Wine', 'Beer', 'Spirit', 'Soft Drink'], required: true },
-            { fieldId: '3', label: 'Local Accommodation Help?', type: 'boolean', required: true }
+            { fieldId: '1', label: 'Dietary Requirements', type: 'text', required: false },
+            { fieldId: '2', label: 'Will you be attending?', type: 'boolean', required: true }
           ],
           lodgingInfo: [
-            { name: "Cresta Jameson", desc: "Heart of Harare vibrant lifestyle.", url: "#" },
-            { name: "Cresta Lodge", desc: "4KM from CBD, quiet and scenic.", url: "#" },
-            { name: "Airbnb Options", desc: "Borrowdale & Helensvale areas are closest.", url: "#" }
+            { name: "Meikles Hotel", desc: "A historic luxury choice in Harare central.", url: "#" },
+            { name: "Cresta Lodge", desc: "Tranquil setting, perfect for wedding guests.", url: "#" }
           ],
-          travelInfo: "Arrival: Robert Gabriel Mugabe International Airport (HRE). Transit: We suggest In-Drive app or pre-booked taxis.",
-          mood: "Classic Elegance with Modern Zimbabwean Roots",
-          religion: "Christian Ceremony"
+          travelInfo: "Arrival: Robert Gabriel Mugabe International Airport (HRE). Venue Umwinzii is located in the northern suburbs of Harare. We recommend using In-Drive or pre-arranged shuttles.",
+          mood: "Black Tie / Formal • Palette: Lilac, Lavender, and Gold",
+          religion: "Christian Tradition"
         });
       }
       
       const guests = await Guest.find().sort({ timestamp: -1 });
       const logs = await Log.find().sort({ timestamp: -1 }).limit(50);
+      const adminLogs = await AdminLog.find().sort({ timestamp: -1 }).limit(100);
       
       return res.json({
         ...settings.toObject(),
         responses: guests,
-        aiLogs: logs
+        aiLogs: logs,
+        adminLogs: adminLogs
       });
     } else {
-      return res.json(mockState);
+      // Basic fallback mock if DB fails
+      return res.json({ rsvpOpen: true, schedule: [], questions: [], lodgingInfo: [], travelInfo: "", mood: "", responses: [], aiLogs: [] });
     }
   } catch (error) {
-    console.error('Error in /api/state:', error);
-    return res.json(mockState);
+    return res.status(500).json({ error: error.message });
   }
 });
 
-// POST state - handle updates with MongoDB
 app.post('/api/state', async (req, res) => {
   try {
     if (dbConnected) {
-      const { responses, aiLogs, newResponse, ...settingsData } = req.body;
-
+      const { newResponse, ...settingsData } = req.body;
+      
+      // Log admin settings changes
       if (Object.keys(settingsData).length > 0) {
-        const existing = await Settings.findOne();
-        if (existing) {
-          await Settings.findByIdAndUpdate(existing._id, { $set: settingsData });
-        } else {
-          await Settings.create(settingsData);
+        // Get current settings for comparison
+        const currentSettings = await Settings.findOne() || {};
+        
+        for (const [field, newValue] of Object.entries(settingsData)) {
+          const oldValue = currentSettings[field];
+          
+          // Only log if value actually changed
+          if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+            await AdminLog.create({
+              action: 'SETTINGS_UPDATE',
+              field: field,
+              oldValue: JSON.stringify(oldValue),
+              newValue: JSON.stringify(newValue),
+              userAgent: req.get('User-Agent'),
+              ip: req.ip || req.connection.remoteAddress
+            });
+            
+            console.log(`🔧 Admin updated ${field}: ${JSON.stringify(oldValue)} → ${JSON.stringify(newValue)}`);
+          }
         }
+        
+        await Settings.findOneAndUpdate({}, { $set: settingsData }, { upsert: true });
       }
-
+      
+      // Log new RSVP responses
       if (newResponse) {
         await Guest.create(newResponse);
+        console.log(`📝 New RSVP from ${newResponse.name} (${newResponse.phone})`);
       }
     }
-    
     return res.json({ success: true });
   } catch (error) {
-    console.error('Error in POST /api/state:', error);
-    return res.json({ success: true }); // Don't fail the frontend
-  }
-});
-
-app.post('/api/webhook/elevenlabs', async (req, res) => {
-  const { tool_name, parameters } = req.body;
-  const settings = await Settings.findOne();
-
-  switch (tool_name) {
-    case 'get_wedding_info':
-      return res.json({
-        schedule: settings?.schedule,
-        mood: settings?.mood,
-        location: "Venue Umwinzii, Harare"
-      });
-
-    case 'add_rsvp':
-      const g = await Guest.create({
-        name: parameters.name,
-        phone: parameters.phone,
-        guests: parameters.guests || 1,
-        answers: parameters.answers || {},
-        aiInteracted: true
-      });
-      await Log.create({
-        guestPhone: parameters.phone,
-        summary: `Voice RSVP for ${parameters.name} (${parameters.guests} ppl)`,
-        type: 'voice'
-      });
-      return res.json({ status: "success" });
-
-    default:
-      return res.status(404).json({ error: "Unknown tool" });
+    console.error('API Error:', error);
+    return res.status(500).json({ error: error.message });
   }
 });
 

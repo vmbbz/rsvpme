@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { 
   Heart, Calendar, MapPin, Clock, Plane, MessageCircle, ChevronRight, 
   Settings, Users, FileText, Plus, Trash2, CheckCircle, X, Phone, Send, 
   Loader2, Lock, Menu, MoreVertical, Mic, MessageSquare, ShieldCheck, Zap, Coffee,
-  Info, Database, Globe, ArrowRight, Sparkles, Instagram, Music, HeartHandshake, Ribbon, ChefHat, Ticket
+  Info, Database, Globe, ArrowRight, Sparkles, Instagram, Music, HeartHandshake, Ribbon, ChefHat, Ticket, ChevronDown
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { GoogleGenAI } from "@google/genai";
@@ -23,6 +22,7 @@ type AppState = {
   questions: { fieldId: string; label: string; type: 'text' | 'select' | 'boolean'; options?: string[]; required: boolean }[];
   responses: any[];
   aiLogs: any[];
+  adminLogs: any[];
   lodgingInfo: { name: string; desc: string; url: string }[];
   travelInfo: string;
   mood: string;
@@ -49,12 +49,48 @@ const API = {
 
 const HERO_IMAGES = [
   "/images/hero-1.jpeg",
-  "/images/hero-2.jpeg",
-  "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200",
-  "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=1200",
+  "/images/hero-7.jpeg",
+  "/images/hero-3.jpeg",
 ];
 
 // --- COMPONENTS ---
+
+const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
+  const [timeLeft, setTimeLeft] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const difference = +new Date(targetDate) - +new Date();
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        });
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <div className="flex gap-4 md:gap-8 justify-center mt-12">
+      {[
+        { label: 'Days', val: timeLeft.days },
+        { label: 'Hours', val: timeLeft.hours },
+        { label: 'Mins', val: timeLeft.minutes },
+        { label: 'Secs', val: timeLeft.seconds }
+      ].map((t, idx) => (
+        <div key={idx} className="flex flex-col items-center">
+          <span className="text-3xl md:text-5xl font-serif italic text-vintage-plum drop-shadow-sm text-visible-edge">{t.val}</span>
+          <span className="text-[10px] uppercase tracking-[0.4em] text-vintage-plum/70 font-bold text-visible-edge">{t.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const ElevenLabsVoice = ({ agentId }: { agentId: string }) => {
   const [active, setActive] = useState(false);
@@ -78,61 +114,12 @@ const ElevenLabsVoice = ({ agentId }: { agentId: string }) => {
   };
 
   return (
-    <button onClick={toggleCall} className="flex flex-col items-center gap-4 group">
-      <div className={`w-24 h-24 rounded-full flex items-center justify-center transition-all shadow-xl ${active ? 'bg-red-500 text-white animate-pulse' : 'bg-stone-50 text-stone-900 group-hover:bg-stone-900 group-hover:text-white'}`}>
-        {active ? <X size={32} /> : <Mic size={32} />}
+    <button onClick={toggleCall} className="flex flex-col items-center gap-6 group">
+      <div className={`w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-lux border ${active ? 'bg-red-500 text-white border-white animate-pulse' : 'bg-vintage-cream text-vintage-plum border-vintage-tan group-hover:bg-vintage-plum group-hover:text-white'}`}>
+        {active ? <X size={28} /> : <Mic size={28} />}
       </div>
-      <span className="text-[11px] font-bold text-stone-400 uppercase tracking-widest">{active ? 'End Call' : 'Call AI'}</span>
+      <span className="text-[11px] font-bold text-vintage-plum uppercase tracking-[0.3em]">{active ? 'End Call' : 'Concierge Call'}</span>
     </button>
-  );
-};
-
-const AIChatModal = ({ onClose, state }: { onClose: () => void, state: AppState }) => {
-  const [messages, setMessages] = useState([{ role: 'ai', text: "Hello! I'm Geraldine & Bright's Wedding Assistant. How can I help?" }]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-    const txt = input; setInput('');
-    setMessages(prev => [...prev, { role: 'user', text: txt }]);
-    setLoading(true);
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const res = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Context: ${JSON.stringify(state)}. User Query: ${txt}`,
-        config: { systemInstruction: "You are the AI Wedding Booker. Be helpful, elegant, and provide travel/schedule info." }
-      });
-      setMessages(prev => [...prev, { role: 'ai', text: res.text || "Thinking..." }]);
-    } catch (e) { setMessages(prev => [...prev, { role: 'ai', text: "Connection slow. Try again!" }]); }
-    finally { setLoading(false); }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center">
-      <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} className="bg-white w-full max-w-xl h-[85vh] sm:h-[700px] rounded-t-[3rem] sm:rounded-[3rem] flex flex-col shadow-2xl overflow-hidden">
-        <div className="p-8 border-b flex justify-between items-center">
-          <div>
-            <h3 className="text-2xl font-serif italic">AI Concierge</h3>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-green-500 mt-1">● Online Support</p>
-          </div>
-          <button onClick={onClose} className="p-2"><X size={28} /></button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-stone-50/50">
-          {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`p-5 rounded-[2rem] max-w-[85%] text-sm leading-relaxed ${m.role === 'user' ? 'bg-stone-900 text-white rounded-tr-none shadow-lg' : 'bg-white border border-stone-100 text-stone-800 rounded-tl-none shadow-sm'}`}>{m.text}</div>
-            </div>
-          ))}
-          {loading && <Loader2 className="animate-spin mx-auto text-stone-300" />}
-        </div>
-        <div className="p-8 border-t bg-white flex gap-3">
-          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} className="flex-1 bg-stone-100 border-none rounded-full px-8 py-5 text-sm focus:ring-2 focus:ring-stone-900" placeholder="Ask about travel, schedule, or RSVPs..." />
-          <button onClick={handleSend} className="w-14 h-14 bg-stone-900 text-white rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-lg"><Send size={20} /></button>
-        </div>
-      </motion.div>
-    </div>
   );
 };
 
@@ -140,62 +127,106 @@ const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) =
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <div className="space-y-16 py-20">
+    <div className="space-y-16 py-20 relative">
       <div className="flex items-center gap-6 mb-16 px-4">
-        <Clock className="text-stone-300" size={32} />
+        <div className="p-4 rounded-full bg-vintage-cream border border-vintage-tan shadow-sm">
+          <Clock className="text-vintage-plum" size={24} />
+        </div>
         <div>
-          <h3 className="text-4xl md:text-5xl font-serif italic text-stone-900">The Day's Flow</h3>
-          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-stone-400 mt-2">A Timeless Chronicle</p>
+          <h3 className="text-5xl md:text-6xl font-serif italic text-vintage-plum">The Celebration</h3>
+          <p className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-tan mt-3">A Chronicle of Joy</p>
         </div>
       </div>
       
-      <div className="relative px-4">
-        <div className="absolute left-[24px] top-0 bottom-0 w-px bg-stone-100" />
+      <div className="space-y-24 relative px-4">
+        <div className="absolute left-[24px] top-0 bottom-0 w-[1px] bg-vintage-tan/40" />
         
-        <div className="space-y-24">
-          {schedule.map((item, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="relative pl-16 group cursor-pointer"
+        {schedule.map((item, idx) => (
+          <motion.div 
+            key={idx}
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="relative"
+          >
+            <div 
+              className="flex items-start gap-8 cursor-pointer group"
               onMouseEnter={() => setActiveIndex(idx)}
               onClick={() => setActiveIndex(idx)}
             >
-              <div className={`absolute left-0 top-1 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-700 z-10 border-4 border-white ${activeIndex === idx ? 'bg-stone-900 text-white scale-125 shadow-2xl' : 'bg-stone-50 text-stone-300'}`}>
-                {item.icon === 'heart' && <Heart size={16} />}
-                {item.icon === 'chef-hat' && <ChefHat size={16} />}
-                {item.icon === 'music' && <Music size={16} />}
-                {item.icon === 'heart-handshake' && <HeartHandshake size={16} />}
-                {!['heart', 'chef-hat', 'music', 'heart-handshake'].includes(item.icon) && <Ribbon size={16} />}
+              {/* Timeline Circle */}
+              <div className="flex flex-col items-center">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-700 z-10 border ${activeIndex === idx ? 'bg-vintage-plum text-white border-vintage-tan scale-110 shadow-xl' : 'bg-vintage-cream text-vintage-plum border-vintage-tan'}`}>
+                  {item.icon === 'heart' && <Heart size={16} />}
+                  {item.icon === 'chef-hat' && <ChefHat size={16} />}
+                  {item.icon === 'music' && <Music size={16} />}
+                  {item.icon === 'heart-handshake' && <HeartHandshake size={16} />}
+                  {!['heart', 'chef-hat', 'music', 'heart-handshake'].includes(item.icon) && <Ribbon size={16} />}
+                </div>
+                {idx < schedule.length - 1 && (
+                  <div className="w-[1px] h-24 bg-vintage-tan/20 mt-2" />
+                )}
               </div>
 
-              <div className="flex flex-col gap-2">
-                <span className={`text-[11px] font-bold tracking-[0.3em] uppercase transition-colors duration-500 ${activeIndex === idx ? 'text-stone-900' : 'text-stone-300'}`}>
-                  {item.time}
-                </span>
-                <h4 className={`text-3xl md:text-4xl font-serif italic transition-all duration-500 ${activeIndex === idx ? 'text-stone-900 translate-x-2' : 'text-stone-400 hover:text-stone-600'}`}>
-                  {item.event}
-                </h4>
-                <AnimatePresence>
-                  {activeIndex === idx && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="text-stone-500 text-sm font-light leading-relaxed pt-4 max-w-md italic">
-                        {item.detail || "Experience a moment of pure celebration as we gather to witness the beautiful union of Geraldine and Bright in the heart of Harare."}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+              {/* Content and Image Container */}
+              <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                {/* Text Content */}
+                <div className="space-y-3">
+                  <span className={`text-[12px] font-bold tracking-[0.4em] uppercase transition-colors duration-500 ${activeIndex === idx ? 'text-vintage-plum' : 'text-vintage-plum/30'}`}>
+                    {item.time}
+                  </span>
+                  <h4 className={`text-3xl md:text-4xl font-serif italic transition-all duration-500 ${activeIndex === idx ? 'text-vintage-plum' : 'text-vintage-plum/40'}`}>
+                    {item.event}
+                  </h4>
+                  <AnimatePresence>
+                    {activeIndex === idx && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <p className="text-vintage-plum/70 text-base font-light leading-relaxed pt-4 max-w-sm italic">
+                          {item.detail || "We invite you to join us for this special moment in our journey as we unite families and celebrate love."}
+                        </p>
+                        <div className="w-12 h-[1px] bg-vintage-tan mt-4" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Dynamic Image - Appears Next to Active Entry */}
+                <div className="relative h-64 md:h-80 lg:h-96">
+                  <AnimatePresence mode="wait">
+                    {activeIndex === idx && (
+                      <motion.div 
+                        key={idx}
+                        initial={{ opacity: 0, scale: 0.95, x: 20 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        exit={{ opacity: 0, scale: 1.05, x: -20 }}
+                        className="relative h-full w-full"
+                      >
+                        <div className="relative h-full w-full p-2 border border-vintage-tan/30 rounded-[3rem] bg-vintage-cream/50">
+                          <div className="absolute inset-2 border border-vintage-tan/10 rounded-[2.5rem] pointer-events-none" />
+                          <motion.img 
+                            src={`/images/schedule-${idx + 1}.jpeg`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="w-full h-full object-cover object-top rounded-[2.5rem] shadow-lux"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = HERO_IMAGES[idx % HERO_IMAGES.length];
+                            }}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
-            </motion.div>
-          ))}
-        </div>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </div>
   );
@@ -203,58 +234,53 @@ const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) =
 
 const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) => {
   const [showRSVP, setShowRSVP] = useState(false);
-  const [showChat, setShowChat] = useState(false);
   const [currentImg, setCurrentImg] = useState(0);
   const [journeyImg, setJourneyImg] = useState(0);
-  const { scrollYProgress } = useScroll();
-  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, 200]);
-
+  const [isJourneyHovered, setIsJourneyHovered] = useState(false);
+  
   useEffect(() => {
-    const timer = setInterval(() => setCurrentImg(p => (p + 1) % HERO_IMAGES.length), 6000);
+    const timer = setInterval(() => setCurrentImg(p => (p + 1) % HERO_IMAGES.length), 8000);
     return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => setJourneyImg(p => (p + 1) % 3), 7000);
+    const timer = setInterval(() => setJourneyImg(p => (p + 1) % 4), 7000);
     return () => clearInterval(timer);
   }, []);
 
-  // Auto-play wedding music
   const [musicPlaying, setMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const audio = new Audio('https://www.bensound.com/bensound-music/bensound-romantic.mp3');
+    const audio = new Audio('https://drive.google.com/uc?export=download&id=1yY17dlyaevmVSWcJ_p4Ubg7pAOPAmCjr');
     audio.loop = true;
-    audio.volume = 0.3;
+    audio.volume = 0.25;
     audioRef.current = audio;
     
-    // Auto-play on arrival
-    audio.play().then(() => {
-      setMusicPlaying(true);
-    }).catch(e => console.log('Audio autoplay prevented'));
+    // Preload the audio
+    audio.load();
     
-    return () => {
-      audio.pause();
-      audio.src = '';
+    return () => { 
+      audio.pause(); 
+      audio.src = ''; 
     };
   }, []);
 
-  const toggleMusic = () => {
+  const toggleMusic = async () => {
     if (audioRef.current) {
-      if (musicPlaying) {
-        audioRef.current.pause();
-        setMusicPlaying(false);
-      } else {
-        audioRef.current.play();
-        setMusicPlaying(true);
+      try {
+        if (musicPlaying) { 
+          audioRef.current.pause(); 
+          setMusicPlaying(false); 
+        } else { 
+          await audioRef.current.play(); 
+          setMusicPlaying(true); 
+        }
+      } catch (error) {
+        console.log('Music play failed:', error);
+        alert('Please click again to enable music - browser requires user interaction');
       }
     }
-  };
-
-  const getJourneyImage = (index: number) => {
-    // Try .jpeg first since that's what you have
-    return `/images/hero-${index + 1}.jpeg`;
   };
 
   const handleRSVPSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -273,127 +299,167 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
     });
     setShowRSVP(false);
     refresh();
-    alert("Response received! We are so excited to see you.");
+    alert("Response received! Geraldine & Tapiwa are so excited to see you.");
   };
 
   return (
-    <div className="bg-stone-50 min-h-screen font-sans text-stone-900 pb-40 overflow-x-hidden selection:bg-stone-900 selection:text-white">
-      {/* Editorial Hero */}
-      <section className="relative h-[110vh] w-full overflow-hidden bg-stone-950 flex flex-col items-center justify-center">
-        <motion.div style={{ y: heroY }} className="absolute inset-0 z-0">
+    <div className="bg-vintage-bg min-h-screen font-sans text-vintage-plum pb-40 overflow-x-hidden selection:bg-vintage-plum selection:text-white">
+      
+      {/* Editorial Hero - PLUM TEXT ON LILAC BG */}
+      <section className="relative h-screen w-full overflow-hidden bg-vintage-bg flex flex-col items-center justify-start py-8 md:py-12">
+        {/* Top Control Bar - Music at Top */}
+        <div className="relative z-50 w-full max-w-5xl flex justify-between items-center px-12 mb-12">
+           <button onClick={toggleMusic} className="w-14 h-14 rounded-full bg-vintage-cream/80 border-2 border-vintage-tan flex items-center justify-center hover:bg-vintage-tan hover:text-white transition-all shadow-lux group">
+              <Music size={24} className={musicPlaying ? "text-vintage-plum group-hover:text-white" : "text-vintage-plum/40"} />
+           </button>
+           <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowRSVP(true)} 
+              disabled={!state.rsvpOpen}
+              className={`py-4 px-10 rounded-full shadow-lux font-bold tracking-[0.4em] uppercase text-[10px] flex items-center justify-center gap-4 transition-all border-2 ${state.rsvpOpen ? 'bg-vintage-plum text-white border-vintage-tan' : 'bg-vintage-cream text-vintage-plum/40 border-vintage-plum/10 cursor-not-allowed'}`}
+            >
+              {state.rsvpOpen ? <><Zap size={16} fill="currentColor" /> RSVP</> : 'CLOSED'}
+            </motion.button>
+        </div>
+
+        {/* Hero Image Container with Deep Plum Filters */}
+        <div className="absolute inset-0 z-0 opacity-35">
           <AnimatePresence mode="wait">
             <motion.img 
               key={currentImg} 
               src={HERO_IMAGES[currentImg]} 
-              initial={{ opacity: 0, scale: 1.15 }} 
-              animate={{ opacity: 0.35, scale: 1 }} 
-              exit={{ opacity: 0, scale: 0.95 }} 
-              transition={{ duration: 2.5 }} 
-              className="absolute inset-0 w-full h-full object-cover grayscale" 
+              initial={{ opacity: 0, scale: 1.05 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0 }} 
+              transition={{ duration: 4 }} 
+              className="absolute inset-0 w-full h-full object-cover object-top grayscale brightness-75 contrast-125" 
             />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-b from-stone-950/20 via-transparent to-stone-950" />
-        </motion.div>
+          <div className="absolute inset-0 bg-gradient-to-b from-vintage-bg/40 via-transparent to-vintage-bg" />
+        </div>
 
         <motion.div 
-          initial={{ opacity: 0, y: 40 }} 
+          initial={{ opacity: 0, y: 30 }} 
           animate={{ opacity: 1, y: 0 }} 
           transition={{ duration: 1.5, ease: "easeOut" }}
-          className="relative z-10 text-center px-6"
+          className="relative z-10 text-center px-6 max-w-5xl flex flex-col items-center mt-8 md:mt-0"
         >
-          <p className="text-white/60 uppercase tracking-[0.6em] text-[10px] md:text-xs font-bold mb-10">Join us as we say</p>
-          <h1 className="text-8xl md:text-[14rem] font-bold font-serif tracking-tighter select-none font-black relative text-center">
-            <svg 
-              className="w-[90%] h-[120px] md:h-[180px] mx-auto" 
-              viewBox="0 0 600 150" 
-              preserveAspectRatio="xMidYMid meet"
-            >
-              <defs>
-                <pattern id="floral" patternUnits="userSpaceOnUse" width="800" height="200">
-                  <image 
-                    href="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=1200" 
-                    x="0" 
-                    y="0" 
-                    width="800" 
-                    height="200" 
-                    preserveAspectRatio="xMidYMid slice"
-                  />
-                </pattern>
-              </defs>
-              <text 
-                x="300" 
-                y="70" 
-                dominantBaseline="central" 
-                textAnchor="middle" 
-                className="font-black"
-                fontSize="170"
-                fontFamily="Playfair Display, Georgia, serif"
-                fontWeight="700"
-                letterSpacing="-15"
-                fill="url(#floral)"
-                stroke="white"
-                strokeWidth="1"
+          <p className="text-vintage-plum font-serif italic text-lg md:text-2xl mb-12 leading-relaxed text-visible-edge">
+            “I have found the one whom my soul loves”
+            <br/>
+            <span className="text-[11px] font-bold uppercase tracking-[0.6em] text-vintage-plum mt-5 inline-block drop-shadow-md">— Song of Solomon 3:4</span>
+          </p>
+
+          <div className="relative mb-12 flex flex-col items-center">
+            {/* LARGE "I DO" SVG BACKGROUND EFFECT */}
+            <p className="text-white/60 uppercase tracking-[0.6em] text-[10px] md:text-xs font-bold mb-10">Join us as we say</p>
+            <h1 className="text-6xl md:text-[12rem] font-bold font-serif tracking-tighter select-none font-black relative text-center">
+              <svg 
+                className="w-[90%] h-[120px] md:h-[180px] mx-auto" 
+                viewBox="0 0 600 150" 
+                preserveAspectRatio="xMidYMid meet"
               >
-                I DO
-              </text>
-            </svg>
-          </h1>
-          <div className="h-px w-24 bg-white/20 mx-auto my-12" />
-          <h2 className="text-white text-3xl md:text-5xl font-serif italic mt-6">Geraldine <span className="text-yellow-300">&</span> Bright</h2>
-          <p className="text-white/60 text-[11px] mt-6 tracking-[0.4em] font-bold uppercase">DECEMBER 17, 2026 • HARARE</p>
-        </motion.div>
+                <defs>
+                  <pattern id="floral" patternUnits="userSpaceOnUse" width="800" height="200">
+                    <image 
+                      href="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=1200" 
+                      x="0" 
+                      y="0" 
+                      width="800" 
+                      height="200" 
+                      preserveAspectRatio="xMidYMid slice"
+                    />
+                  </pattern>
+                </defs>
+                <text 
+                  x="300" 
+                  y="70" 
+                  dominantBaseline="central" 
+                  textAnchor="middle" 
+                  className="font-black"
+                  fontSize="140"
+                  fontFamily="Playfair Display, Georgia, serif"
+                  fontWeight="700"
+                  letterSpacing="-15"
+                  fill="url(#floral)"
+                  stroke="white"
+                  strokeWidth="1"
+                >
+                  I DO
+                </text>
+              </svg>
+            </h1>
+            
+          </div>
 
-        <motion.div 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }} 
-          transition={{ delay: 2, duration: 1 }}
-          className="absolute top-12 left-12 flex flex-col items-center gap-4 text-white/30 group"
-        >
-          <button 
-            onClick={toggleMusic}
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all"
-          >
-            {musicPlaying ? <Music size={20} /> : <Music size={20} className="opacity-50" />}
-          </button>
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em] opacity-0 group-hover:opacity-100 transition-opacity">Music</span>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }} 
-          transition={{ delay: 2, duration: 1 }}
-          className="absolute bottom-12 flex flex-col items-center gap-4 text-white/30"
-        >
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Scroll</span>
-          <div className="w-px h-16 bg-gradient-to-b from-white/30 to-transparent" />
+          <div className="ornamental-line mx-auto mb-8 max-w-xs" />
+          
+          <CountdownTimer targetDate="2026-05-16T12:00:00" />
         </motion.div>
       </section>
 
-      {/* Main Container */}
-      <div className="max-w-xl md:max-w-2xl mx-auto px-6 space-y-48">
+      {/* Main Content Area */}
+      <div className="max-w-xl md:max-w-4xl mx-auto px-6 space-y-64">
         
-        {/* Intro Reveal */}
-        <section className="relative z-10 -mt-24">
+        {/* Journey Invitation - NATURAL DISCOVERY VIA SCROLL */}
+        <section id="journey-invitation" className="relative z-10 -mt-16">
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }} 
-            whileInView={{ opacity: 1, scale: 1 }} 
-            transition={{ duration: 1.5 }}
-            className="aspect-[3/4] rounded-[4rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative border-[12px] border-white group bg-white"
+            initial={{ opacity: 0, y: 40 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 1.2 }}
+            onMouseEnter={() => setIsJourneyHovered(true)}
+            onMouseLeave={() => setIsJourneyHovered(false)}
+            className="rounded-[3rem] overflow-hidden shadow-lux relative border border-vintage-tan/30 bg-vintage-cream"
           >
-            <AnimatePresence mode="wait">
-              <motion.img 
-                key={journeyImg} 
-                src={getJourneyImage(journeyImg)} 
-                initial={{ opacity: 0, scale: 1.1 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                exit={{ opacity: 0 }} 
-                transition={{ duration: 1.5 }} 
-                className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-[3s] scale-105 group-hover:scale-100" 
-              />
-            </AnimatePresence>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col items-center justify-end p-16 text-center">
-              <span className="text-white/40 text-[10px] uppercase tracking-[0.5em] font-bold mb-4">The Journey</span>
-              <h2 className="text-white text-4xl md:text-5xl font-serif italic">A Symphony of Love</h2>
+            {/* Thinner inner frame */}
+            <div className="absolute inset-4 border border-vintage-tan/10 rounded-[2.5rem] z-20 pointer-events-none" />
+            
+            <div className="absolute inset-0 z-0 opacity-50">
+              <AnimatePresence mode="wait">
+                <motion.img 
+                  key={journeyImg} 
+                  src={journeyImg === 0 ? "/images/hero-2.jpeg" : journeyImg === 1 ? "/images/hero-4.jpeg" : journeyImg === 2 ? "/images/hero-5.jpeg" : "/images/hero-6.jpeg"} 
+                  initial={{ opacity: 0 }} 
+                  animate={{ 
+                    opacity: 0.6,
+                    filter: isJourneyHovered ? "grayscale(0%)" : "grayscale(100%)"
+                  }} 
+                  exit={{ opacity: 0 }} 
+                  transition={{ duration: 1.5 }} 
+                  className="w-full h-full object-cover object-top" 
+                />
+              </AnimatePresence>
+            </div>
+
+            <div className="relative flex flex-col items-center justify-center p-16 md:p-28 text-center text-vintage-plum space-y-14 z-10">
+              <div className="space-y-5">
+                <p className="font-serif italic text-4xl md:text-6xl tracking-tight text-visible-edge">Geraldine Rumbidzai</p>
+                <p className="text-[12px] font-bold uppercase tracking-[0.5em] text-black opacity-80">3rd born of Mr and Mrs Kagowa</p>
+              </div>
+              
+              <div className="text-4xl font-serif italic text-black/20">— and —</div>
+
+              <div className="space-y-5">
+                <p className="font-serif italic text-4xl md:text-6xl tracking-tight text-visible-edge">Brighton Tapiwa</p>
+                <p className="text-[12px] font-bold uppercase tracking-[0.5em] text-black opacity-80">1st born of Mr and Mrs Mutsekwa</p>
+              </div>
+
+              <div className="ornamental-line max-w-xs" />
+
+              <p className="text-lg font-light leading-relaxed max-w-md tracking-wide text-black/70 italic text-visible-edge">
+                Together with their families invite you to celebrate their marriage
+              </p>
+              
+              <div className="space-y-4">
+                <p className="text-4xl md:text-5xl font-serif italic text-visible-edge">Saturday 16 May 2026</p>
+                <p className="text-[14px] font-bold uppercase tracking-[0.8em] text-black/80">12 Noon Sharp</p>
+              </div>
+
+              <div className="pt-10">
+                <p className="text-[11px] font-bold uppercase tracking-[0.6em] text-black/40 mb-4">The Venue</p>
+                <p className="text-3xl font-serif italic border-b border-vintage-tan/40 pb-3 px-6 inline-block text-visible-edge">Umwinzii, Harare</p>
+              </div>
             </div>
           </motion.div>
         </section>
@@ -403,179 +469,155 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           <InteractiveTimeline schedule={state.schedule} />
         </section>
 
-        {/* Location & Map */}
+        {/* Guest Information - Updated with New Content */}
         <section>
           <div className="flex items-center gap-6 mb-16">
-            <MapPin className="text-stone-300" size={32} />
+            <div className="p-4 rounded-full bg-vintage-cream border border-vintage-tan shadow-sm">
+              <Plane className="text-vintage-plum" size={24} />
+            </div>
             <div>
-              <h3 className="text-4xl font-serif italic text-stone-900">Venue Umwinzii</h3>
-              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-stone-400 mt-2">The Emerald Oasis</p>
+              <h3 className="text-5xl font-serif italic text-vintage-plum">Important Details</h3>
+              <p className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-tan mt-3">Dress Code & Logistics</p>
             </div>
           </div>
-          <div className="aspect-video rounded-[3rem] overflow-hidden shadow-lux border-8 border-white grayscale hover:grayscale-0 transition-all duration-1000">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15197.808249852234!2d31.14488585!3d-17.72337775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1931a5758364843b%3A0x6b47c0b484594c35!2sVenue%20Umwinzii!5e0!3m2!1sen!2szw!4v1715600000000!5m2!1sen!2szw" className="w-full h-full border-0" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+            <div className="bg-vintage-cream/60 p-16 rounded-[4rem] shadow-lux border border-vintage-tan/20 space-y-10 relative">
+              <div className="absolute top-6 right-8 text-black opacity-[0.05] font-serif italic text-7xl">01</div>
+              <h4 className="text-3xl font-serif italic text-black/80 border-l-2 border-vintage-tan pl-8 text-visible-edge">Dress Code</h4>
+              <p className="text-black/70 text-lg leading-relaxed italic text-visible-edge">
+                Black tie - polished, glamorous and unforgettable. Bring the glam and we'll bring the love
+              </p>
+              <div className="pt-8">
+                <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-black mb-4">RSVP Deadline</p>
+                <p className="text-lg font-serif italic text-black/80">Kindly RSVP by 28 February 2026</p>
+                <p className="text-sm text-black/60 italic mt-2">"Don't leave us hanging, invitations will only be valid once confirmed"</p>
+              </div>
+            </div>
+            <div className="bg-vintage-plum p-16 rounded-[4rem] shadow-lux border border-vintage-tan/30 space-y-12 text-white relative overflow-hidden">
+               <div className="absolute top-6 right-8 text-white opacity-[0.05] font-serif italic text-7xl">02</div>
+              <div className="space-y-5">
+                <p className="text-[11px] font-bold text-vintage-tan uppercase tracking-[0.5em]">Transportation</p>
+                <p className="text-lg font-serif italic tracking-wide text-visible-edge">
+                  Shuttles will be available from town and bride and groom's residences
+                </p>
+              </div>
+              <div className="ornamental-line opacity-20" />
+              <div className="space-y-5">
+                <p className="text-[11px] font-bold text-vintage-tan uppercase tracking-[0.5em]">Contact</p>
+                <p className="text-lg font-serif italic tracking-wide text-visible-edge">
+                  For RSVP and inquiries, please contact the wedding team
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Lodging */}
-        <section className="space-y-16">
-          <div className="flex items-center gap-6">
-            <Heart className="text-stone-300" size={32} />
+        {/* Location Section - Moved to Second-to-Last */}
+        <section className="relative">
+          <div className="flex items-center gap-6 mb-16">
+            <div className="p-4 rounded-full bg-vintage-cream border border-vintage-tan shadow-sm">
+              <MapPin className="text-vintage-plum" size={24} />
+            </div>
             <div>
-              <h3 className="text-4xl font-serif italic">Accommodation</h3>
-              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-stone-400 mt-2">Where to Rest</p>
+              <h3 className="text-5xl font-serif italic text-vintage-plum">Directions & Location</h3>
+              <p className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-tan mt-3">Find Your Way</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-8">
-            {state.lodgingInfo.map((l, i) => (
-              <motion.div 
-                key={i} 
-                whileHover={{ x: 10 }}
-                className="bg-white p-10 rounded-[3rem] shadow-sm border border-stone-100 flex justify-between items-center group transition-all"
-              >
-                <div>
-                  <h4 className="text-2xl font-serif italic text-stone-900">{l.name}</h4>
-                  <p className="text-sm text-stone-400 mt-2 italic">{l.desc}</p>
-                </div>
-                <button className="w-14 h-14 bg-stone-50 rounded-full flex items-center justify-center group-hover:bg-stone-900 group-hover:text-white transition-all shadow-sm"><ChevronRight size={24}/></button>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Aesthetic Block - Restored Wording */}
-        <section className="bg-stone-950 text-white p-16 md:p-24 rounded-[5rem] space-y-16 shadow-3xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-12 text-white/5 font-serif text-[15rem] leading-none select-none italic translate-x-12 -translate-y-12">B&G</div>
-          <div className="space-y-6 relative z-10">
-            <Plane className="text-stone-800" size={60} />
-            <h3 className="text-5xl font-serif italic leading-tight">Travel & Precision Mood</h3>
-            <p className="text-stone-400 text-lg font-light leading-relaxed max-w-md">{state.travelInfo}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-12 pt-12 border-t border-white/10 relative z-10">
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold text-stone-600 uppercase tracking-[0.4em]">Visual Code</p>
-              <p className="text-xl font-serif italic text-stone-200">{state.mood}</p>
-            </div>
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold text-stone-600 uppercase tracking-[0.4em]">Heritage</p>
-              <p className="text-xl font-serif italic text-stone-200">{state.religion}</p>
+          <div className="aspect-video rounded-[4rem] overflow-hidden shadow-lux border border-vintage-tan/30 p-2 bg-vintage-cream">
+            <div className="w-full h-full rounded-[3.5rem] overflow-hidden grayscale hover:grayscale-0 transition-all duration-1000 border border-vintage-tan/10">
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15197.808249852234!2d31.14488585!3d-17.72337775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1931a5758364843b%3A0x6b47c0b484594c35!2sVenue%20Umwinzii!5e0!3m2!1sen!2szw!4v1715600000000!5m2!1sen!2szw" className="w-full h-full border-0" />
             </div>
           </div>
         </section>
       </div>
 
-      {/* Concierge Hub - Restored Wording */}
-      <footer className="mt-80 border-t border-stone-200 bg-white py-48 text-center space-y-24">
-        <div className="space-y-6">
-          <h3 className="text-6xl font-serif italic text-stone-900">The Concierge</h3>
-          <p className="text-stone-400 font-serif text-2xl italic opacity-60">We are here to assist with every detail.</p>
+      {/* Footer Concierge - Updated with Closing Line */}
+      <footer className="mt-32 border-t border-vintage-tan/20 bg-vintage-cream/10 py-32 text-center space-y-24">
+        <div className="space-y-10">
+          <h3 className="text-7xl font-serif italic text-vintage-plum tracking-tight text-visible-edge">The Concierge</h3>
+          <div className="ornamental-line mx-auto max-w-xs" />
+          <p className="text-black/60 font-serif text-3xl italic max-w-2xl mx-auto px-6 text-visible-edge">
+            Assisting you with every fine detail for the union.
+          </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20 max-w-4xl mx-auto px-6">
-          <button onClick={() => setShowChat(true)} className="flex flex-col items-center gap-4 group">
-            <div className="w-24 h-24 rounded-full bg-stone-50 flex items-center justify-center text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-all shadow-xl">
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-24 max-w-5xl mx-auto px-8">
+          <button onClick={() => {}} className="flex flex-col items-center gap-8 group">
+            <div className="w-24 h-24 rounded-full bg-vintage-cream flex items-center justify-center text-vintage-plum border border-vintage-tan group-hover:bg-vintage-plum group-hover:text-white transition-all shadow-lux">
               <MessageSquare size={32} />
             </div>
-            <span className="text-[11px] font-bold text-stone-400 uppercase tracking-widest">AI Chat</span>
+            <span className="text-[11px] font-bold text-vintage-plum uppercase tracking-[0.4em] text-visible-edge">Digital Chat</span>
           </button>
           
           <ElevenLabsVoice agentId={state.elevenLabsAgentId} />
 
-          <button className="flex flex-col items-center gap-4 group">
-            <div className="w-24 h-24 rounded-full bg-stone-50 flex items-center justify-center text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-all shadow-xl">
+          <button className="flex flex-col items-center gap-8 group">
+            <div className="w-24 h-24 rounded-full bg-vintage-cream flex items-center justify-center text-vintage-plum border border-vintage-tan group-hover:bg-vintage-plum group-hover:text-white transition-all shadow-lux">
               <Phone size={32} />
             </div>
-            <span className="text-[11px] font-bold text-stone-400 uppercase tracking-widest">The Couple</span>
+            <span className="text-[11px] font-bold text-vintage-plum uppercase tracking-[0.4em] text-visible-edge">Contact Team</span>
           </button>
+        </div>
+        
+        <div className="pt-16">
+          <p className="text-vintage-plum/80 font-serif text-2xl italic max-w-2xl mx-auto px-6">
+            "Love, laughter and happily ever after - with you 💕"
+          </p>
         </div>
       </footer>
 
-      {/* Persistent RSVP Signature Bar */}
-      <div className="fixed bottom-8 left-0 right-0 flex justify-center z-[150] px-6">
-        <motion.button 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowRSVP(true)} 
-          disabled={!state.rsvpOpen}
-          className={`w-full max-w-xs py-6 px-8 rounded-full shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] font-bold tracking-[0.4em] uppercase text-[10px] flex items-center justify-center gap-4 transition-all border border-white/20 ${state.rsvpOpen ? 'bg-stone-900 text-white' : 'bg-stone-300 text-stone-500 cursor-not-allowed'}`}
-        >
-          {state.rsvpOpen ? (
-            <>
-              <Zap size={16} fill="currentColor" /> 
-              RSVP
-            </>
-          ) : 'RSVPs Paused'}
-        </motion.button>
-      </div>
-
-      {/* Modals */}
+      {/* RSVP Modal */}
       <AnimatePresence>
-        {showChat && <AIChatModal state={state} onClose={() => setShowChat(false)} />}
         {showRSVP && (
-          <div className="fixed inset-0 z-[300] bg-stone-950/95 backdrop-blur-3xl flex items-center justify-center p-6 overflow-y-auto">
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] p-8 md:p-12 shadow-2xl">
-              <div className="flex justify-between items-center mb-8 sticky top-0 bg-white pb-4">
+          <div className="fixed inset-0 z-[300] bg-vintage-plum/85 backdrop-blur-xl flex items-center justify-center p-6 overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.98, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="bg-vintage-cream w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-[3.5rem] p-12 md:p-24 shadow-lux border border-vintage-tan/40 relative">
+              <div className="absolute inset-4 border border-vintage-tan/10 rounded-[3rem] pointer-events-none" />
+              
+              <div className="flex justify-between items-center mb-20 sticky top-0 bg-vintage-cream pb-10 z-10">
                 <div>
-                  <h3 className="text-4xl font-serif italic text-stone-900 flex items-center gap-3">
-                    <Ticket className="text-yellow-500" size={28} />
-                    Registry
+                  <h3 className="text-5xl font-serif italic text-vintage-plum flex items-center gap-6">
+                    <Ticket className="text-vintage-tan" size={32} />
+                    The RSVP
                   </h3>
-                  <p className="text-stone-400 text-[10px] font-bold uppercase tracking-[0.4em] mt-2">Confirm Attendance</p>
+                  <p className="text-vintage-tan text-[11px] font-bold uppercase tracking-[0.6em] mt-4">Confirm Your Presence</p>
                 </div>
-                <button onClick={() => setShowRSVP(false)} className="w-12 h-12 bg-stone-50 rounded-full text-stone-400 flex items-center justify-center hover:text-stone-900 hover:bg-red-50 transition-all">
-                  <X size={24} />
+                <button onClick={() => setShowRSVP(false)} className="w-14 h-14 bg-vintage-plum text-white rounded-full flex items-center justify-center hover:scale-110 transition-all border border-vintage-tan/50 shadow-lg relative z-30">
+                  <X size={28} />
                 </button>
               </div>
-              <form onSubmit={handleRSVPSubmit} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-4">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-stone-400 ml-6 flex items-center gap-2">
-                      <Users className="text-yellow-500" size={16} />
-                      Full Name
-                    </label>
-                    <input name="name" required className="w-full bg-stone-50 border border-stone-200 rounded-full p-4 text-lg focus:border-yellow-500 transition-all" placeholder="Full name" />
+              
+              <form onSubmit={handleRSVPSubmit} className="space-y-14 relative z-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-14">
+                  <div className="space-y-6">
+                    <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-8">Full Name</label>
+                    <input name="name" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-6 text-xl focus:border-vintage-plum focus:ring-0 transition-all font-serif italic" placeholder="Enter name" />
                   </div>
-                  <div className="space-y-4">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-stone-400 ml-6 flex items-center gap-2">
-                      <Phone className="text-yellow-500" size={16} />
-                      Phone
-                    </label>
-                    <input name="phone" required className="w-full bg-stone-50 border border-stone-200 rounded-full p-4 text-lg focus:border-yellow-500 transition-all" placeholder="+263..." />
+                  <div className="space-y-6">
+                    <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-8">WhatsApp Number</label>
+                    <input name="phone" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-6 text-xl focus:border-vintage-plum focus:ring-0 transition-all font-serif italic" placeholder="+263..." />
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-stone-400 ml-6 flex items-center gap-2">
-                    <Users className="text-yellow-500" size={16} />
-                    Party Count
-                  </label>
-                  <input name="count" type="number" defaultValue="1" min="1" className="w-full bg-stone-50 border border-stone-200 rounded-full p-4 text-lg focus:border-yellow-500 transition-all" />
-                </div>
+
                 {state.questions.map(q => (
-                  <div key={q.fieldId} className="space-y-4">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-stone-400 ml-6 flex items-center gap-2">
-                      <FileText className="text-yellow-500" size={16} />
-                      {q.label}
-                    </label>
-                    {q.type === 'select' ? (
-                      <select name={q.fieldId} className="w-full bg-stone-50 border border-stone-200 rounded-full p-4 text-lg appearance-none focus:border-yellow-500 transition-all">
-                        {q.options?.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
-                    ) : q.type === 'boolean' ? (
-                      <div className="flex gap-6">
-                        {['Yes', 'No'].map(v => (
-                          <label key={v} className="flex-1 p-4 bg-stone-50 border border-stone-200 rounded-[2.5rem] text-center cursor-pointer has-[:checked]:bg-stone-900 has-[:checked]:text-white transition-all font-bold tracking-widest hover:border-yellow-500">
-                            <input type="radio" name={q.fieldId} value={v} className="hidden" defaultChecked={v==='Yes'} /> {v}
+                  <div key={q.fieldId} className="space-y-6">
+                    <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-8">{q.label}</label>
+                    {q.type === 'boolean' ? (
+                      <div className="flex gap-10">
+                        {['Joyfully Attend', 'Decline'].map(v => (
+                          <label key={v} className="flex-1 p-7 bg-white/40 border border-vintage-tan/20 rounded-full text-center cursor-pointer has-[:checked]:bg-vintage-plum has-[:checked]:text-white has-[:checked]:border-vintage-tan transition-all font-bold text-xs uppercase tracking-[0.4em]">
+                            <input type="radio" name={q.fieldId} value={v} className="hidden" defaultChecked={v==='Joyfully Attend'} /> {v}
                           </label>
                         ))}
                       </div>
                     ) : (
-                      <input name={q.fieldId} className="w-full bg-stone-50 border border-stone-200 rounded-full p-4 text-lg focus:border-yellow-500 transition-all" placeholder="..." />
+                      <input name={q.fieldId} className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-6 text-xl focus:border-vintage-plum transition-all font-serif italic" placeholder="..." />
                     )}
                   </div>
                 ))}
-                <div className="pt-8">
-                  <button type="submit" className="w-full py-6 px-12 bg-stone-900 text-white rounded-full font-bold shadow-2xl text-base uppercase tracking-[0.4em] hover:scale-105 transition-all flex items-center justify-center gap-3">
-                    <Ticket size={18} />
-                    Confirm Registry
+                
+                <div className="pt-12">
+                  <button type="submit" className="w-full py-8 bg-vintage-plum text-white rounded-full font-bold shadow-lux border border-vintage-tan/50 uppercase tracking-[0.8em] text-sm hover:scale-[1.02] transition-all">
+                    Register Presence
                   </button>
                 </div>
               </form>
@@ -594,13 +636,14 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
 
   if (!authed) {
     return (
-      <div className="min-h-screen bg-stone-950 flex items-center justify-center p-8">
-        <div className="bg-white p-14 rounded-[4.5rem] w-full max-w-sm text-center shadow-3xl">
-          <ShieldCheck className="mx-auto mb-10 text-stone-100" size={80} />
-          <h2 className="text-3xl font-serif italic mb-2">Master Key</h2>
-          <p className="text-stone-400 text-sm mb-12 italic">Authenticating the Portal</p>
-          <input type="password" value={pass} onChange={e => setPass(e.target.value)} onKeyDown={e => e.key==='Enter' && (pass===state.adminPassword ? setAuthed(true) : alert('Wrong Key'))} className="w-full bg-stone-50 p-7 rounded-[2.5rem] text-center mb-8 border-none focus:ring-2 focus:ring-stone-900" placeholder="••••" />
-          <button onClick={() => pass===state.adminPassword ? setAuthed(true) : alert('Wrong Key')} className="w-full py-7 bg-stone-900 text-white rounded-full font-bold shadow-lg">Enter OS</button>
+      <div className="min-h-screen bg-vintage-plum flex items-center justify-center p-8">
+        <div className="bg-vintage-cream p-20 rounded-[4rem] w-full max-w-sm text-center shadow-lux border border-vintage-tan/40 relative">
+          <div className="absolute inset-4 border border-vintage-tan/10 rounded-[3rem] pointer-events-none" />
+          <ShieldCheck className="mx-auto mb-12 text-vintage-plum" size={72} />
+          <h2 className="text-4xl font-serif italic mb-3 text-vintage-plum">Registry OS</h2>
+          <p className="text-vintage-tan text-[11px] mb-14 italic uppercase tracking-[0.5em] font-bold">Secure Access</p>
+          <input type="password" value={pass} onChange={e => setPass(e.target.value)} onKeyDown={e => e.key==='Enter' && (pass===state.adminPassword ? setAuthed(true) : alert('Incorrect Key'))} className="w-full bg-white/50 p-8 rounded-full text-center mb-10 focus:ring-1 focus:ring-vintage-plum outline-none border border-vintage-tan/30 text-3xl font-serif" placeholder="••••" />
+          <button onClick={() => pass===state.adminPassword ? setAuthed(true) : alert('Incorrect Key')} className="w-full py-8 bg-vintage-plum text-white rounded-full font-bold uppercase tracking-[0.4em] text-[11px] border border-vintage-tan/50 shadow-lux hover:scale-[1.03] transition-all">Enter</button>
         </div>
       </div>
     );
@@ -609,67 +652,94 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
   const totals = { guests: state.responses.reduce((a,b) => a+b.guests, 0) };
 
   const addQuestion = async () => {
-    const q = { fieldId: Date.now().toString(), label: 'New Requirement', type: 'text', required: false };
+    const q = { fieldId: Date.now().toString(), label: 'New Requirement', type: 'text' as const, required: false };
     await API.updateState({ questions: [...state.questions, q] });
     refresh();
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 font-sans flex flex-col md:flex-row">
-      <nav className="w-full md:w-80 bg-stone-900 text-white p-12 flex flex-col">
-        <div className="flex items-center gap-3 mb-24"><Zap size={28} /><h1 className="text-2xl font-serif italic">Registry OS</h1></div>
-        <div className="space-y-4 flex-1">
+    <div className="min-h-screen bg-vintage-bg font-sans flex flex-col md:flex-row">
+      <nav className="w-full md:w-80 bg-vintage-plum text-white p-14 flex flex-col border-r border-vintage-tan/20 shadow-lux">
+        <div className="flex items-center gap-5 mb-24">
+          <Zap size={32} className="text-vintage-tan"/>
+          <h1 className="text-3xl font-serif italic tracking-tight">Admin G&T</h1>
+        </div>
+        <div className="space-y-6 flex-1">
           {[
             { id: 'overview', icon: Coffee, label: 'Stats' },
-            { id: 'guests', icon: Users, label: 'Guest Ledger' },
-            { id: 'builder', icon: FileText, label: 'Form Builder' },
-            { id: 'logs', icon: ShieldCheck, label: 'AI Activity' },
-            { id: 'settings', icon: Settings, label: 'Core Setup' }
+            { id: 'guests', icon: Users, label: 'Guest List' },
+            { id: 'builder', icon: FileText, label: 'RSVP Fields' },
+            { id: 'logs', icon: ShieldCheck, label: 'Activity' },
+            { id: 'settings', icon: Settings, label: 'General' }
           ].map(p => (
-            <button key={p.id} onClick={() => setPanel(p.id as any)} className={`w-full text-left p-6 rounded-[2rem] flex items-center gap-4 transition-all ${panel === p.id ? 'bg-white text-stone-900 font-bold shadow-xl' : 'text-stone-500 hover:text-white'}`}>
-              <p.icon size={20} /> {p.label}
+            <button key={p.id} onClick={() => setPanel(p.id as any)} className={`w-full text-left p-6 rounded-[2.5rem] flex items-center gap-5 transition-all border ${panel === p.id ? 'bg-vintage-cream text-vintage-plum font-bold shadow-lux border-vintage-tan' : 'text-white/40 border-transparent hover:text-white'}`}>
+              <p.icon size={18} /> {p.label}
             </button>
           ))}
         </div>
-        <div className="mt-20 p-8 bg-white/5 rounded-[3rem] border border-white/5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-4">Capacity</p>
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-white" style={{ width: `${Math.min(100, (totals.guests/state.maxGuests)*100)}%` }} /></div>
-          <p className="text-sm mt-3 font-medium">{totals.guests} / {state.maxGuests}</p>
+        <div className="mt-24 p-8 bg-black/15 rounded-[3rem] border border-white/5 shadow-inner">
+          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-vintage-tan mb-5">Venue Capacity</p>
+          <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+            <div className="h-full bg-vintage-tan" style={{ width: `${Math.min(100, (totals.guests/state.maxGuests)*100)}%` }} />
+          </div>
+          <p className="text-sm mt-5 font-serif italic text-white/80">{totals.guests} <span className="text-vintage-tan mx-1">/</span> {state.maxGuests}</p>
         </div>
       </nav>
 
       <main className="flex-1 p-12 md:p-24 overflow-y-auto">
-        <header className="flex justify-between items-center mb-20">
-          <h2 className="text-6xl font-serif italic capitalize">{panel}</h2>
-          <button onClick={() => API.updateState({ rsvpOpen: !state.rsvpOpen }).then(refresh)} className={`px-12 py-5 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm ${state.rsvpOpen ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-            Status: {state.rsvpOpen ? 'Open' : 'Closed'}
+        <header className="flex justify-between items-center mb-28">
+          <h2 className="text-7xl font-serif italic capitalize text-vintage-plum tracking-tight">{panel}</h2>
+          <button onClick={() => API.updateState({ rsvpOpen: !state.rsvpOpen }).then(refresh)} className={`px-12 py-5 rounded-full text-[10px] font-bold uppercase tracking-[0.4em] border shadow-lux transition-all ${state.rsvpOpen ? 'bg-green-50/50 text-green-700 border-green-200' : 'bg-red-50/50 text-red-700 border-red-200'}`}>
+            RSVPs: {state.rsvpOpen ? 'OPEN' : 'CLOSED'}
           </button>
         </header>
 
         {panel === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div className="bg-white p-12 rounded-[4rem] shadow-sm border border-stone-100"><p className="text-[11px] font-bold uppercase text-stone-400 mb-2">Confirmed</p><p className="text-8xl font-serif italic">{totals.guests}</p></div>
-            <div className="bg-white p-12 rounded-[4rem] shadow-sm border border-stone-100"><p className="text-[11px] font-bold uppercase text-stone-400 mb-2">AI Interacted</p><p className="text-8xl font-serif italic text-blue-500">{state.responses.filter(r=>r.aiInteracted).length}</p></div>
-            <div className="bg-white p-12 rounded-[4rem] shadow-sm border border-stone-100"><p className="text-[11px] font-bold uppercase text-stone-400 mb-2">Alerts</p><p className="text-8xl font-serif italic text-red-400">{state.responses.filter(r=>r.answers && Object.values(r.answers).some(v=>!!v)).length}</p></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-14">
+            {[
+              { label: 'Confirmed Guests', val: totals.guests, color: 'text-vintage-plum' },
+              { label: 'Total Parties', val: state.responses.length, color: 'text-vintage-tan' },
+              { label: 'AI Assistance', val: state.responses.filter(r=>r.aiInteracted).length, color: 'text-vintage-muted' }
+            ].map((s, i) => (
+              <div key={i} className="bg-vintage-cream p-14 rounded-[4rem] shadow-lux border border-vintage-tan/20 relative overflow-hidden">
+                <div className="absolute -right-8 -bottom-8 opacity-5">
+                   <Heart size={160} className="text-vintage-plum" />
+                </div>
+                <p className="text-[11px] font-bold uppercase text-vintage-plum/40 tracking-[0.4em] mb-6">{s.label}</p>
+                <p className={`text-9xl font-serif italic ${s.color}`}>{s.val}</p>
+              </div>
+            ))}
           </div>
         )}
 
         {panel === 'guests' && (
-          <div className="bg-white rounded-[4rem] shadow-2xl overflow-hidden border border-stone-100">
+          <div className="bg-white/40 rounded-[4rem] shadow-lux overflow-hidden border border-vintage-tan/20 backdrop-blur-sm">
             <table className="w-full text-left">
-              <thead><tr className="bg-stone-50 text-[10px] uppercase font-bold text-stone-400 tracking-widest"><th className="p-10">Guest</th><th className="p-10">Party</th><th className="p-10">Details</th></tr></thead>
+              <thead>
+                <tr className="bg-vintage-cream/80 text-[10px] uppercase font-bold text-vintage-plum tracking-[0.4em] border-b border-vintage-tan/20">
+                  <th className="p-12">Name</th>
+                  <th className="p-12">Party</th>
+                  <th className="p-12">Interaction</th>
+                </tr>
+              </thead>
               <tbody>
                 {state.responses.map((r, i) => (
-                  <tr key={i} className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
-                    <td className="p-10"><p className="font-bold text-xl">{r.name}</p><p className="text-stone-400 text-sm">{r.phone}</p></td>
-                    <td className="p-10"><span className="px-6 py-2 bg-stone-100 rounded-full font-bold">{r.guests}</span></td>
-                    <td className="p-10">
-                      <div className="flex gap-2 flex-wrap">
-                        {r.aiInteracted && <span className="bg-blue-50 text-blue-500 text-[9px] font-bold px-3 py-1 rounded-full uppercase">Voice Assisted</span>}
-                        {r.answers && Object.entries(r.answers).map(([k,v]) => v && (
-                          <span key={k} className="bg-stone-50 border px-3 py-1 rounded-full text-[9px] text-stone-500 uppercase font-bold">{v as string}</span>
-                        ))}
-                      </div>
+                  <tr key={i} className="border-b border-vintage-tan/5 hover:bg-vintage-bg/10 transition-colors">
+                    <td className="p-12">
+                      <p className="font-serif italic text-3xl text-vintage-plum">{r.name}</p>
+                      <p className="text-vintage-tan font-bold mt-2 uppercase tracking-[0.2em] text-[10px]">{r.phone}</p>
+                    </td>
+                    <td className="p-12">
+                      <span className="px-8 py-3 bg-vintage-cream/60 rounded-full font-serif italic text-vintage-plum border border-vintage-tan/30 text-xl shadow-sm">
+                        {r.guests}
+                      </span>
+                    </td>
+                    <td className="p-12">
+                       {r.aiInteracted ? (
+                         <span className="bg-vintage-plum text-white text-[9px] font-bold px-6 py-2 rounded-full uppercase tracking-[0.3em] border border-vintage-tan/50 shadow-sm">Voice Assistant</span>
+                       ) : (
+                         <span className="bg-vintage-cream text-vintage-plum/40 text-[9px] font-bold px-6 py-2 rounded-full uppercase tracking-[0.3em] border border-vintage-tan/10">Manual Registry</span>
+                       )}
                     </td>
                   </tr>
                 ))}
@@ -679,27 +749,27 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
         )}
 
         {panel === 'builder' && (
-          <div className="max-w-2xl space-y-8">
-            <button onClick={addQuestion} className="w-full py-6 bg-stone-900 text-white rounded-[2rem] font-bold flex items-center justify-center gap-3"><Plus size={20}/> Add Registry Field</button>
-            <div className="space-y-4">
+          <div className="max-w-4xl space-y-12">
+            <button onClick={addQuestion} className="w-full py-8 bg-vintage-plum text-white rounded-[3rem] font-bold border border-vintage-tan/40 flex items-center justify-center gap-5 uppercase tracking-[0.4em] text-[11px] shadow-lux hover:scale-[1.01] transition-all"><Plus size={20}/> Add Requirement Field</button>
+            <div className="space-y-8">
               {state.questions.map((q, i) => (
-                <div key={q.fieldId} className="p-8 bg-white rounded-[3rem] shadow-sm border border-stone-100 flex items-center justify-between group">
-                  <div className="flex-1 mr-6">
+                <div key={q.fieldId} className="p-12 bg-vintage-cream/80 rounded-[4rem] shadow-lux border border-vintage-tan/20 flex items-center justify-between group backdrop-blur-sm">
+                  <div className="flex-1 mr-12">
                     <input value={q.label} onChange={async (e) => {
                       const nq = [...state.questions]; nq[i].label = e.target.value; await API.updateState({questions: nq}); refresh();
-                    }} className="w-full bg-stone-50 p-4 rounded-2xl font-bold border-none" />
+                    }} className="w-full bg-white/60 p-6 rounded-[2rem] font-serif italic text-2xl text-vintage-plum border border-vintage-tan/20 focus:border-vintage-plum transition-all" />
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex gap-6">
                     <select value={q.type} onChange={async (e) => {
                       const nq = [...state.questions]; nq[i].type = e.target.value as any; await API.updateState({questions: nq}); refresh();
-                    }} className="bg-stone-50 p-4 rounded-2xl text-xs uppercase font-bold border-none">
+                    }} className="bg-white/60 p-6 rounded-[2rem] text-[11px] uppercase font-bold border border-vintage-tan/20 text-vintage-plum shadow-sm">
                       <option value="text">Text</option>
                       <option value="select">Select</option>
                       <option value="boolean">Boolean</option>
                     </select>
                     <button onClick={async () => {
                       const nq = state.questions.filter(x=>x.fieldId!==q.fieldId); await API.updateState({questions: nq}); refresh();
-                    }} className="w-12 h-12 bg-red-50 text-red-400 rounded-full flex items-center justify-center"><Trash2 size={18}/></button>
+                    }} className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center border border-red-100 hover:bg-red-600 hover:text-white transition-all shadow-sm"><Trash2 size={20}/></button>
                   </div>
                 </div>
               ))}
@@ -708,39 +778,75 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
         )}
 
         {panel === 'logs' && (
-          <div className="space-y-6">
-            {state.aiLogs.map((log, i) => (
-              <div key={i} className="p-8 bg-white rounded-[3rem] border border-stone-100 flex gap-8 items-center shadow-sm">
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${log.type==='voice' ? 'bg-blue-50 text-blue-500' : 'bg-stone-50 text-stone-400'}`}><Mic size={24}/></div>
-                <div className="flex-1">
-                  <p className="font-bold text-lg">{log.guestPhone}</p>
-                  <p className="text-stone-500 text-sm mt-1">{log.summary}</p>
+          <div className="space-y-16 max-w-5xl">
+            {/* Admin Activity Logs */}
+            <div className="space-y-8">
+              <h3 className="text-4xl font-serif italic text-vintage-plum border-b border-vintage-tan/30 pb-4">Admin Activity</h3>
+              {state.adminLogs?.map((log, i) => (
+                <div key={`admin-${i}`} className="p-10 bg-vintage-plum/10 rounded-[3rem] border border-vintage-plum/20 flex gap-8 items-center shadow-lux backdrop-blur-sm">
+                  <div className="w-16 h-16 rounded-full bg-vintage-plum text-white flex items-center justify-center border border-vintage-tan shadow-lg">
+                    <Settings size={24}/>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-serif italic text-2xl text-vintage-plum capitalize">{log.field.replace(/([A-Z])/g, ' $1').trim()}</p>
+                    <p className="text-vintage-plum/60 text-sm mt-2 font-mono">
+                      {log.oldValue} → {log.newValue}
+                    </p>
+                  </div>
+                  <span className="text-[10px] uppercase tracking-[0.5em] text-vintage-tan font-bold bg-white/60 px-6 py-2 rounded-full border border-vintage-tan/20 shadow-sm">
+                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </div>
-                <span className="text-[10px] uppercase tracking-widest text-stone-300 font-bold">{new Date(log.timestamp).toLocaleTimeString()}</span>
-              </div>
-            ))}
+              ))}
+              {(!state.adminLogs || state.adminLogs.length === 0) && (
+                <p className="text-vintage-plum/40 text-center italic py-12">No admin activity yet</p>
+              )}
+            </div>
+
+            {/* Guest AI Logs */}
+            <div className="space-y-8">
+              <h3 className="text-4xl font-serif italic text-vintage-plum border-b border-vintage-tan/30 pb-4">Guest Interactions</h3>
+              {state.aiLogs.map((log, i) => (
+                <div key={`guest-${i}`} className="p-12 bg-vintage-cream/90 rounded-[4rem] border border-vintage-tan/30 flex gap-12 items-center shadow-lux backdrop-blur-sm">
+                  <div className={`w-20 h-20 rounded-full flex items-center justify-center border ${log.type==='voice' ? 'bg-vintage-plum text-white border-vintage-tan shadow-lg' : 'bg-white text-vintage-tan border-vintage-tan/20 shadow-sm'}`}>
+                    <Mic size={28}/>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-serif italic text-3xl text-vintage-plum">{log.guestPhone}</p>
+                    <p className="text-vintage-plum/70 text-xl mt-3 font-light">"{log.summary}"</p>
+                  </div>
+                  <span className="text-[10px] uppercase tracking-[0.5em] text-vintage-tan font-bold bg-white/60 px-8 py-3 rounded-full border border-vintage-tan/20 shadow-sm">
+                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              ))}
+              {state.aiLogs.length === 0 && (
+                <p className="text-vintage-plum/40 text-center italic py-12">No guest interactions yet</p>
+              )}
+            </div>
           </div>
         )}
 
         {panel === 'settings' && (
-          <div className="max-w-2xl bg-white p-14 rounded-[4.5rem] shadow-2xl space-y-12">
-            <div className="space-y-4">
-              <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">ElevenLabs Agent ID</label>
-              <input value={state.elevenLabsAgentId} onChange={e => API.updateState({elevenLabsAgentId: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none" placeholder="agent-id-xxx" />
+          <div className="max-w-4xl bg-vintage-cream/80 p-20 rounded-[5rem] shadow-lux border border-vintage-tan/30 space-y-20 backdrop-blur-sm relative">
+            <div className="absolute inset-6 border border-vintage-tan/10 rounded-[4rem] pointer-events-none" />
+            <div className="space-y-8">
+              <label className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-plum/40 ml-10">Voice Agent Context (ElevenLabs)</label>
+              <input value={state.elevenLabsAgentId} onChange={e => API.updateState({elevenLabsAgentId: e.target.value}).then(refresh)} className="w-full bg-white/60 p-8 rounded-[3rem] border border-vintage-tan/30 text-xl font-serif italic focus:border-vintage-plum transition-all shadow-sm" placeholder="agent-id-xxx" />
             </div>
-            <div className="grid grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">Max Capacity</label>
-                <input type="number" value={state.maxGuests} onChange={e => API.updateState({maxGuests: parseInt(e.target.value)}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none" />
+            <div className="grid grid-cols-2 gap-16">
+              <div className="space-y-8">
+                <label className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-plum/40 ml-10">Venue Capacity</label>
+                <input type="number" value={state.maxGuests} onChange={e => API.updateState({maxGuests: parseInt(e.target.value)}).then(refresh)} className="w-full bg-white/60 p-8 rounded-[3rem] border border-vintage-tan/30 text-2xl font-serif italic shadow-sm" />
               </div>
-              <div className="space-y-4">
-                <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">Dashboard Key</label>
-                <input value={state.adminPassword} onChange={e => API.updateState({adminPassword: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none" />
+              <div className="space-y-8">
+                <label className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-plum/40 ml-10">Admin Key</label>
+                <input value={state.adminPassword} onChange={e => API.updateState({adminPassword: e.target.value}).then(refresh)} className="w-full bg-white/60 p-8 rounded-[3rem] border border-vintage-tan/30 text-2xl font-serif italic shadow-sm" />
               </div>
             </div>
-            <div className="space-y-4">
-              <label className="text-[11px] font-bold uppercase text-stone-400 ml-6">Precision Mood</label>
-              <textarea value={state.mood} onChange={e => API.updateState({mood: e.target.value}).then(refresh)} className="w-full bg-stone-50 p-7 rounded-[2.5rem] border-none h-32" />
+            <div className="space-y-8">
+              <label className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-plum/40 ml-10">The Wedding Theme Description</label>
+              <textarea value={state.mood} onChange={e => API.updateState({mood: e.target.value}).then(refresh)} className="w-full bg-white/60 p-10 rounded-[4rem] border border-vintage-tan/30 text-xl leading-relaxed h-48 focus:border-vintage-plum transition-all shadow-sm font-serif italic" />
             </div>
           </div>
         )}
@@ -766,10 +872,12 @@ const App = () => {
   }, []);
 
   if (!state) return (
-    <div className="h-screen bg-stone-50 flex items-center justify-center font-serif text-3xl italic animate-pulse">
-      <div className="flex flex-col items-center gap-10">
-        <Sparkles size={40} className="text-stone-300" />
-        <span className="text-stone-400 tracking-widest text-[11px] font-bold uppercase">Preparing the Celebration...</span>
+    <div className="h-screen bg-vintage-bg flex items-center justify-center font-serif text-4xl italic animate-pulse text-vintage-plum">
+      <div className="flex flex-col items-center gap-16">
+        <div className="p-8 rounded-full border border-vintage-tan/40 shadow-lux">
+          <Sparkles size={48} className="text-vintage-plum" />
+        </div>
+        <span className="text-vintage-plum tracking-[1.2em] text-[12px] font-bold uppercase">Preparing the Union...</span>
       </div>
     </div>
   );

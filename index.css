@@ -5,7 +5,8 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #fdfcf9;
+  background-color: #fdfcfb;
+  color: #2a1a2a;
 }
 
 /* Custom Scrollbar Hide */
@@ -29,8 +30,11 @@ input, select, textarea {
   animation: float 3s ease-in-out infinite;
 }
 
-/* Custom Utilities for those needing specific serif handling beyond Tailwind */
 .font-serif-italic {
   font-family: "Bodoni Moda", serif;
   font-style: italic;
+}
+
+.shadow-lux {
+  box-shadow: 0 30px 60px -12px rgba(42, 26, 42, 0.15), 0 18px 36px -18px rgba(42, 26, 42, 0.2);
 }

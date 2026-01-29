@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Geraldine & Bright Wedding Invitation</title>
+    <title>Geraldine & Tapiwa | The Union</title>
+    
+    <!-- Link Preview Metadata -->
+    <meta name="description" content="We invite you to witness the beginning of our forever. Saturday, 16 May 2026.">
+    <meta property="og:title" content="Geraldine & Tapiwa - Wedding Invitation">
+    <meta property="og:description" content="Join us as we celebrate our love at Venue Umwinzii. Click to view details and RSVP.">
+    <meta property="og:image" content="/images/hero-1.jpeg">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Only use CDN in development
-      if (window.location.hostname === 'localhost') {
+      if (window.location.hostname === 'localhost' || window.location.hostname.includes('webcontainer')) {
         tailwind.config = {
           theme: {
             extend: {
@@ -16,7 +24,25 @@
                 sans: ['"Outfit"', 'sans-serif'],
               },
               colors: {
-                stone: { 50: '#fdfcf9' }
+                // Colors extracted exactly from the provided circle strip
+                'vintage-bg': '#d5c0d5',      // Top Circle: Soft Lilac Background
+                'vintage-plum': '#6a4a6a',    // Middle Circle: Deep Plum for main text/accents
+                'vintage-tan': '#b89c8e',     // Bottom Circle: Brown/Tan for borders and luxury effects
+                'vintage-cream': '#e8dcd5',   // 4th Circle: Creamy Tan for subtle card backgrounds
+                'vintage-muted': '#a68ca6',   // 2nd Circle: Muted Lilac for secondary elements
+                lilac: {
+                  50: '#f9f6f9',
+                  100: '#f3ecf3',
+                  200: '#e8dce8',
+                  300: '#d5c0d5',
+                  400: '#c8b4c8',
+                  500: '#a68ca6',
+                  600: '#8a6e8a',
+                  700: '#6a4a6a',
+                  800: '#4a3a4a',
+                  900: '#2a1a2a',
+                  950: '#1a0a1a',
+                },
               }
             }
           }
@@ -38,18 +64,18 @@
     "@google/genai": "https://esm.sh/@google/genai@^1.38.0",
     "framer-motion": "https://esm.sh/framer-motion@^12.29.2",
     "@elevenlabs/client": "https://esm.sh/@elevenlabs/client@^0.0.8",
-    "express": "https://esm.sh/express@^5.2.1",
+    "vite": "https://esm.sh/vite@^7.3.1",
     "cors": "https://esm.sh/cors@^2.8.6",
-    "fs": "https://esm.sh/fs@^0.0.1-security",
     "path": "https://esm.sh/path@^0.12.7",
-    "dotenv": "https://esm.sh/dotenv@^17.2.3",
-    "mongoose": "https://esm.sh/mongoose@^9.1.5"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "express": "https://esm.sh/express@^5.2.1",
+    "mongoose": "https://esm.sh/mongoose@^9.1.5",
+    "dotenv": "https://esm.sh/dotenv@^17.2.3"
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
-<body class="bg-[#fdfcf9]">
+<body class="bg-vintage-bg text-vintage-plum">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>
