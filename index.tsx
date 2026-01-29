@@ -254,13 +254,17 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
   useEffect(() => {
     // Try multiple sources in order of preference
     const audioSources = [
-      '/audio/wedding-music.mp3', // Local file (best option)
-      'https://www.bensound.com/bensound-music/bensound-romantic.mp3' // Fallback
+      'https://www.bensound.com/bensound-music/bensound-romantic.mp3', // Cloud streaming (most reliable)
+      '/audio/wedding-music.mp3' // Local fallback
     ];
     
     const audio = new Audio();
     audio.loop = true;
     audio.volume = 0.25;
+    
+    // Add proper headers for streaming
+    audio.crossOrigin = 'anonymous';
+    audio.preload = 'auto';
     
     let currentSourceIndex = 0;
     
@@ -274,8 +278,8 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
       }
     };
     
-    audio.addEventListener('error', () => {
-      console.log(`Audio source ${currentSourceIndex} failed, trying next...`);
+    audio.addEventListener('error', (e) => {
+      console.log(`Audio source ${currentSourceIndex} failed, trying next...`, e);
       tryNextSource();
     });
     
