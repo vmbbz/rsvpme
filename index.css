@@ -1,5 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Outfit:wght@100..900&display=swap');
 
+/* Custom Wedding Theme Colors */
+:root {
+  --vintage-plum: #2a1a2a;
+  --vintage-tan: #c4a57b;
+  --vintage-cream: #fdfcfb;
+  --vintage-bg: #f5f0e8;
+}
+
+/* Essential Custom Classes for Timeline */
+.text-vintage-plum { color: #2a1a2a; }
+.text-vintage-tan { color: #c4a57b; }
+.bg-vintage-plum { background-color: #2a1a2a; }
+.bg-vintage-tan { background-color: #c4a57b; }
+.bg-vintage-cream { background-color: #fdfcfb; }
+.bg-vintage-bg { background-color: #f5f0e8; }
+.border-vintage-plum { border-color: #2a1a2a; }
+.border-vintage-tan { border-color: #c4a57b; }
+
+/* Opacity variants */
+.text-vintage-plum\/30 { color: rgba(42, 26, 42, 0.3); }
+.text-vintage-plum\/40 { color: rgba(42, 26, 42, 0.4); }
+.text-vintage-plum\/60 { color: rgba(42, 26, 42, 0.6); }
+.text-vintage-plum\/70 { color: rgba(42, 26, 42, 0.7); }
+.bg-vintage-cream\/30 { background-color: rgba(253, 252, 251, 0.3); }
+.border-vintage-tan\/30 { border-color: rgba(196, 165, 123, 0.3); }
+.border-vintage-tan\/40 { border-color: rgba(196, 165, 123, 0.4); }
+
 /* Global Styles */
 body {
   margin: 0;

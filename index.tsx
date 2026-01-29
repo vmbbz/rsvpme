@@ -151,12 +151,12 @@ const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) =
             className="relative"
           >
             <div 
-              className="flex flex-col lg:flex-row items-start gap-8 lg:gap-16 cursor-pointer group"
+              className="flex flex-col cursor-pointer group"
               onMouseEnter={() => setActiveIndex(idx)}
               onClick={() => setActiveIndex(idx)}
             >
-              {/* Timeline Indicator Column */}
-              <div className="flex items-center lg:items-start gap-8 w-full lg:w-auto">
+              {/* Timeline Circle and Time/Title Row */}
+              <div className="flex items-start gap-6 mb-6">
                 <div className="flex flex-col items-center">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-700 z-10 border ${activeIndex === idx ? 'bg-vintage-plum text-white border-vintage-tan scale-110 shadow-xl' : 'bg-vintage-cream text-vintage-plum border-vintage-tan'}`}>
                     {item.icon === 'heart' && <Heart size={16} />}
@@ -167,41 +167,29 @@ const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) =
                   </div>
                 </div>
                 
-                {/* Time & Title - Always Visible */}
-                <div className="space-y-1 lg:hidden">
-                  <span className="text-[12px] font-bold tracking-[0.4em] uppercase text-vintage-plum/60">
+                {/* Time & Title */}
+                <div className="flex-1">
+                  <span className={`text-[12px] font-bold tracking-[0.4em] uppercase transition-colors duration-500 ${activeIndex === idx ? 'text-vintage-plum' : 'text-vintage-plum/30'}`}>
                     {item.time}
                   </span>
-                  <h4 className="text-3xl font-serif italic text-vintage-plum">
+                  <h4 className={`text-2xl md:text-4xl font-serif italic transition-all duration-500 ${activeIndex === idx ? 'text-vintage-plum' : 'text-vintage-plum/40'}`}>
                     {item.event}
                   </h4>
                 </div>
               </div>
 
-              {/* Grid Container for Layout */}
-              <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start w-full ml-14 lg:ml-0">
-                {/* Text Content */}
-                <div className="space-y-4">
-                  <div className="hidden lg:block space-y-2">
-                    <span className={`text-[12px] font-bold tracking-[0.4em] uppercase transition-colors duration-500 ${activeIndex === idx ? 'text-vintage-plum' : 'text-vintage-plum/30'}`}>
-                      {item.time}
-                    </span>
-                    <h4 className={`text-4xl font-serif italic transition-all duration-500 ${activeIndex === idx ? 'text-vintage-plum' : 'text-vintage-plum/40'}`}>
-                      {item.event}
-                    </h4>
-                  </div>
-                  
-                  {/* Detail - Visible on Mobile by default, Animated on Desktop */}
-                  <div className="block lg:block">
-                    <p className="text-vintage-plum/70 text-lg font-light leading-relaxed italic max-w-sm">
-                      {item.detail || "We invite you to join us for this special moment in our journey as we unite families and celebrate love."}
-                    </p>
-                    <div className="w-12 h-[1px] bg-vintage-tan mt-6" />
-                  </div>
+              {/* Content and Image */}
+              <div className="ml-18 space-y-6">
+                {/* Detail Text */}
+                <div>
+                  <p className="text-vintage-plum/70 text-base font-light leading-relaxed italic max-w-sm">
+                    {item.detail || "We invite you to join us for this special moment in our journey as we unite families and celebrate love."}
+                  </p>
+                  <div className="w-12 h-[1px] bg-vintage-tan mt-4" />
                 </div>
 
-                {/* Always Visible Image for Vertical Flow / Timeline Flow */}
-                <div className="relative w-full aspect-video lg:aspect-square rounded-[2.5rem] overflow-hidden border border-vintage-tan/30 bg-vintage-cream/30 shadow-lux">
+                {/* Image */}
+                <div className="relative w-full aspect-video rounded-[2rem] overflow-hidden border border-vintage-tan/30 bg-vintage-cream/30 shadow-lux">
                    <img 
                     src={`/images/schedule-${idx + 1}.jpeg`}
                     className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-1000"
@@ -483,10 +471,8 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               <p className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-tan mt-3">Find Your Way</p>
             </div>
           </div>
-          <div className="aspect-video rounded-[3rem] overflow-hidden shadow-lux border border-vintage-tan/30 p-2 bg-vintage-cream">
-            <div className="w-full h-full rounded-[2.5rem] overflow-hidden grayscale hover:grayscale-0 transition-all duration-1000">
-              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15197.808249852234!2d31.14488585!3d-17.72337775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1931a5758364843b%3A0x6b47c0b484594c35!2sVenue%20Umwinzii!5e0!3m2!1sen!2szw!4v1715600000000!5m2!1sen!2szw" className="w-full h-full border-0" />
-            </div>
+          <div className="aspect-square rounded-[1rem] overflow-hidden shadow-lux border border-vintage-tan/20">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15197.808249852234!2d31.14488585!3d-17.72337775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1931a5758364843b%3A0x6b47c0b484594c35!2sVenue%20Umwinzii!5e0!3m2!1sen!2szw!4v1715600000000!5m2!1sen!2szw" className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-1000" />
           </div>
         </section>
       </div>
@@ -510,11 +496,15 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           
           <ElevenLabsVoice agentId={state.elevenLabsAgentId} />
 
-          <button className="flex flex-col items-center gap-6">
-            <div className="w-20 h-20 rounded-full bg-vintage-cream flex items-center justify-center text-vintage-plum border border-vintage-tan shadow-lux">
+          <button 
+            onClick={() => window.open('tel:+263772100875', '_self')}
+            className="flex flex-col items-center gap-6 group"
+          >
+            <div className="w-20 h-20 rounded-full bg-vintage-cream flex items-center justify-center text-vintage-plum border border-vintage-tan shadow-lux group-hover:bg-vintage-plum group-hover:text-white transition-all">
               <Phone size={28} />
             </div>
             <span className="text-[11px] font-bold text-vintage-plum uppercase tracking-[0.4em]">Contact Team</span>
+            <span className="text-[10px] text-vintage-plum/60 font-medium">+263772100875</span>
           </button>
         </div>
         
