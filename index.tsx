@@ -321,6 +321,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
     audio.volume = 0.25;
     audio.crossOrigin = 'anonymous';
     audio.preload = 'auto';
+    audio.muted = false; // Ensure not muted
     
     let currentSourceIndex = 0;
     
@@ -335,6 +336,52 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
     tryNextSource();
     audioRef.current = audio;
     audio.load();
+    
+    // Aggressive autoplay strategy
+    const attemptAutoplay = async () => {
+      try {
+        // First try muted autoplay (browsers allow this)
+        audio.muted = true;
+        await audio.play();
+        console.log('Muted autoplay successful');
+        
+        // Then unmute after a short delay
+        setTimeout(() => {
+          audio.muted = false;
+          setMusicPlaying(true);
+          console.log('Music unmuted and playing');
+        }, 500);
+      } catch (error) {
+        console.log('Muted autoplay blocked, trying direct approach');
+        
+        // Try direct autoplay
+        audio.muted = false;
+        audio.play().then(() => {
+          setMusicPlaying(true);
+          console.log('Direct autoplay successful');
+        }).catch(() => {
+          console.log('Direct autoplay blocked, will try on interaction');
+          
+          // Multiple delayed attempts
+          const delays = [100, 500, 1000, 2000, 3000];
+          delays.forEach(delay => {
+            setTimeout(() => {
+              if (!musicPlaying) {
+                audio.play().then(() => {
+                  setMusicPlaying(true);
+                  console.log(`Delayed autoplay successful at ${delay}ms`);
+                }).catch(() => {
+                  console.log(`Delayed autoplay failed at ${delay}ms`);
+                });
+              }
+            }, delay);
+          });
+        });
+      }
+    };
+    
+    // Attempt autoplay immediately
+    attemptAutoplay();
     
     return () => { 
       audio.pause(); 
@@ -367,16 +414,38 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           console.log('Music autoplay blocked');
         });
       }
+      // Remove listeners after first attempt to avoid multiple triggers
       document.removeEventListener('click', startMusicOnInteraction);
       document.removeEventListener('touchstart', startMusicOnInteraction);
+      document.removeEventListener('scroll', startMusicOnInteraction);
+      document.removeEventListener('visibilitychange', startMusicOnInteraction);
     };
 
+    // Add multiple event listeners for better autoplay chances
     document.addEventListener('click', startMusicOnInteraction);
     document.addEventListener('touchstart', startMusicOnInteraction);
+    document.addEventListener('scroll', startMusicOnInteraction, { once: true });
+    document.addEventListener('visibilitychange', startMusicOnInteraction);
+    
+    // Also try on mouse movement (less aggressive)
+    const mouseHandler = () => {
+      if (!musicPlaying && audioRef.current) {
+        audioRef.current.play().then(() => {
+          setMusicPlaying(true);
+          document.removeEventListener('mousemove', mouseHandler);
+        }).catch(() => {});
+      }
+    };
+    setTimeout(() => {
+      document.addEventListener('mousemove', mouseHandler, { once: true });
+    }, 2000);
     
     return () => {
       document.removeEventListener('click', startMusicOnInteraction);
       document.removeEventListener('touchstart', startMusicOnInteraction);
+      document.removeEventListener('scroll', startMusicOnInteraction);
+      document.removeEventListener('visibilitychange', startMusicOnInteraction);
+      document.removeEventListener('mousemove', mouseHandler);
     };
   }, [musicPlaying]);
 
