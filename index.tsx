@@ -453,10 +453,10 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
         </motion.div>
       </section>
 
-      <div className="max-w-xl md:max-w-4xl mx-auto px-6 space-y-64 mt-32">
+      <div className="max-w-xl md:max-w-4xl mx-auto px-4 md:px-6 space-y-64 mt-32">
         
         {/* Journey Invitation - NATURAL DISCOVERY VIA SCROLL */}
-        <section id="journey-invitation" className="relative z-10 -mt-16">
+        <section id="journey-invitation" className="relative z-10 -mt-16 -mx-2 md:mx-0">
           <motion.div 
             initial={{ opacity: 0, y: 40 }} 
             whileInView={{ opacity: 1, y: 0 }} 
@@ -485,35 +485,38 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               </AnimatePresence>
           </div>
           
-            <div className="relative flex flex-col items-center justify-center p-8 md:p-16 text-center space-y-6 z-10">
-              <div className="space-y-1">
-                <p className="font-serif italic text-4xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg">Geraldine Rumbidzai</p>
-                <p className="text-[12px] font-bold uppercase tracking-[0.4em] text-black">3rd born of Mr and Mrs Kagowa</p>
+            <div className="relative flex flex-col items-center justify-center p-6 md:p-16 text-center space-y-8 md:space-y-6 z-10">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-center md:gap-8 w-full mb-4 md:mb-0">
+                <div className="space-y-2 md:space-y-1 md:text-center">
+                  <p className="font-serif italic text-3xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg text-center md:text-left">Geraldine Rumbidzai</p>
+                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">3rd born of Mr and Mrs Kagowa</p>
+                </div>
+                
+                <div className="text-3xl md:text-5xl font-serif italic text-vintage-plum/40 text-center md:text-center my-4 md:my-0">— and —</div>
+
+                <div className="space-y-2 md:space-y-1 md:text-center">
+                  <p className="font-serif italic text-3xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg text-center md:text-left">Brighton Tapiwa</p>
+                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">1st born of Mr and Mrs Mutsekwa</p>
+                </div>
               </div>
               
-              <div className="text-4xl md:text-5xl font-serif italic text-vintage-plum/40">— and —</div>
+              <div className="ornamental-line max-w-xs mb-4 md:mb-0" />
 
-              <div className="space-y-1">
-                <p className="font-serif italic text-4xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg">Brighton Tapiwa</p>
-                <p className="text-[12px] font-bold uppercase tracking-[0.4em] text-black">1st born of Mr and Mrs Mutsekwa</p>
-              </div>
-              
-              <div className="ornamental-line max-w-xs" />
-
-              <p className="text-xl md:text-2xl font-normal leading-relaxed max-w-lg tracking-wide text-vintage-plum/90 italic drop-shadow-md">
+              <p className="text-xl md:text-2xl font-normal leading-relaxed max-w-lg tracking-wide text-vintage-plum/90 italic drop-shadow-md mb-4 md:mb-0">
                 Together with their families invite you to celebrate their marriage
               </p>
-              
-              <div className="space-y-1">
-                <p className="text-4xl md:text-5xl font-serif italic text-vintage-plum drop-shadow-lg">Saturday 16 May 2026</p>
-                <p className="text-[14px] font-bold uppercase tracking-[0.6em] text-black">12 Noon Sharp</p>
+　　 　 　 　
+              <div className="space-y-2 md:space-y-1 mb-4 md:mb-0">
+                <p className="text-3xl md:text-5xl font-serif italic text-vintage-plum drop-shadow-lg"><span className="md:hidden">Sat</span><span className="hidden md:inline">Saturday</span> 16 May 2026</p>
+                <p className="text-[13px] md:text-[14px] font-bold uppercase tracking-[0.6em] text-black">12 Noon Sharp</p>
               </div>
 
-              <div className="pt-3">
+              <div className="pt-3 md:pt-3">
                 <p className="text-[12px] font-bold uppercase tracking-[0.4em] text-black mb-1">The Venue</p>
                 <p className="text-3xl md:text-4xl font-serif italic text-vintage-plum drop-shadow-lg">Umwinzii, Harare</p>
               </div>
-              
+　
+　
               {/* Compact Quick Info Bar */}
               <div className="mt-3 pt-3 border-t border-vintage-plum/20 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
                 <div className="space-y-1">
