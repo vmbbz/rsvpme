@@ -4,7 +4,7 @@ import {
   Heart, Calendar, MapPin, Clock, Plane, MessageCircle, ChevronRight, 
   Settings, Users, FileText, Plus, Trash2, CheckCircle, X, Phone, Send, 
   Loader2, Lock, Menu, MoreVertical, Mic, MessageSquare, ShieldCheck, Zap, Coffee,
-  Info, Database, Globe, ArrowRight, Sparkles, Instagram, Music, HeartHandshake, Ribbon, ChefHat, Ticket, ChevronDown
+  Info, Database, Globe, ArrowRight, Sparkles, Instagram, Music, HeartHandshake, Ribbon, ChefHat, Ticket, ChevronDown, Car
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { GoogleGenAI } from "@google/genai";
@@ -125,6 +125,64 @@ const ElevenLabsVoice = ({ agentId }: { agentId: string }) => {
 
 const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasError, setHasError] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>({});
+
+  useEffect(() => {
+    try {
+      if (!schedule || schedule.length === 0) {
+        setHasError(true);
+      } else {
+        setHasError(false);
+      }
+    } catch (error) {
+      console.error('Timeline error:', error);
+      setHasError(true);
+    }
+  }, [schedule]);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  if (hasError) {
+    return (
+      <div className="space-y-16 py-20 relative">
+        <div className="flex items-center gap-6 mb-16 px-4">
+          <div className="p-4 rounded-full bg-vintage-cream border border-vintage-tan shadow-sm">
+            <Clock className="text-vintage-plum" size={24} />
+          </div>
+          <div>
+            <h3 className="text-5xl font-serif italic text-vintage-plum">The Celebration</h3>
+            <p className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-tan mt-3">A Chronicle of Joy</p>
+          </div>
+        </div>
+        
+        <div className="bg-vintage-cream/60 rounded-[2rem] p-12 text-center border border-vintage-tan/30">
+          <div className="space-y-6">
+            <div className="w-16 h-16 mx-auto rounded-full bg-vintage-plum/10 flex items-center justify-center">
+              <Calendar className="text-vintage-plum" size={32} />
+            </div>
+            <h4 className="text-2xl font-serif italic text-vintage-plum">Schedule Loading</h4>
+            <p className="text-vintage-plum/70 max-w-md mx-auto">
+              The wedding schedule is currently being updated. Please check back soon for the complete celebration timeline.
+            </p>
+            <div className="pt-4">
+              <p className="text-sm text-vintage-plum/50">
+                Saturday 16 May 2026 • 12 Noon Sharp • Umwinzii, Harare
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-16 py-20 relative">
@@ -138,9 +196,9 @@ const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) =
         </div>
       </div>
       
-      <div className="space-y-32 relative px-4">
+      <div className="space-y-32 relative px-4 md:px-6">
         {/* Continuous Timeline Line */}
-        <div className="absolute left-[24px] top-0 bottom-0 w-[1px] bg-vintage-tan/40" />
+        <div className={`absolute ${isMobile ? 'left-[20px]' : 'left-[24px]'} top-0 bottom-0 w-[1px] bg-vintage-tan/40`} />
         
         {schedule.map((item, idx) => (
           <motion.div 
@@ -152,18 +210,19 @@ const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) =
           >
             <div 
               className="flex flex-col cursor-pointer group"
-              onMouseEnter={() => setActiveIndex(idx)}
+              onMouseEnter={() => !isMobile && setActiveIndex(idx)}
+              onTouchStart={() => isMobile && setActiveIndex(idx)}
               onClick={() => setActiveIndex(idx)}
             >
               {/* Timeline Circle and Time/Title Row */}
               <div className="flex items-start gap-6 mb-6">
                 <div className="flex flex-col items-center">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-700 z-10 border ${activeIndex === idx ? 'bg-vintage-plum text-white border-vintage-tan scale-110 shadow-xl' : 'bg-vintage-cream text-vintage-plum border-vintage-tan'}`}>
-                    {item.icon === 'heart' && <Heart size={16} />}
-                    {item.icon === 'chef-hat' && <ChefHat size={16} />}
-                    {item.icon === 'music' && <Music size={16} />}
-                    {item.icon === 'heart-handshake' && <HeartHandshake size={16} />}
-                    {!['heart', 'chef-hat', 'music', 'heart-handshake'].includes(item.icon) && <Ribbon size={16} />}
+                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-700 z-10 border ${activeIndex === idx ? 'bg-vintage-plum text-white border-vintage-tan scale-110 shadow-xl' : 'bg-vintage-cream text-vintage-plum border-vintage-tan'}`}>
+                    {item.icon === 'heart' && <Heart size={isMobile ? 14 : 16} />}
+                    {item.icon === 'chef-hat' && <ChefHat size={isMobile ? 14 : 16} />}
+                    {item.icon === 'music' && <Music size={isMobile ? 14 : 16} />}
+                    {item.icon === 'heart-handshake' && <HeartHandshake size={isMobile ? 14 : 16} />}
+                    {!['heart', 'chef-hat', 'music', 'heart-handshake'].includes(item.icon) && <Ribbon size={isMobile ? 14 : 16} />}
                   </div>
                 </div>
                 
@@ -172,29 +231,55 @@ const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) =
                   <span className={`text-[12px] font-bold tracking-[0.4em] uppercase transition-colors duration-500 ${activeIndex === idx ? 'text-vintage-plum' : 'text-vintage-plum/30'}`}>
                     {item.time}
                   </span>
-                  <h4 className={`text-2xl md:text-4xl font-serif italic transition-all duration-500 ${activeIndex === idx ? 'text-vintage-plum' : 'text-vintage-plum/40'}`}>
+                  <h4 className={`text-xl md:text-2xl lg:text-4xl font-serif italic transition-all duration-500 ${activeIndex === idx ? 'text-vintage-plum' : 'text-vintage-plum/40'}`}>
                     {item.event}
                   </h4>
                 </div>
               </div>
 
               {/* Content and Image */}
-              <div className="ml-18 space-y-6">
+              <div className={`${isMobile ? 'ml-14' : 'ml-18'} space-y-6`}>
                 {/* Detail Text */}
                 <div>
-                  <p className="text-vintage-plum/70 text-base font-light leading-relaxed italic max-w-sm">
+                  <p className="text-vintage-plum/70 text-sm md:text-base font-light leading-relaxed italic max-w-sm">
                     {item.detail || "We invite you to join us for this special moment in our journey as we unite families and celebrate love."}
                   </p>
                   <div className="w-12 h-[1px] bg-vintage-tan mt-4" />
                 </div>
 
                 {/* Image */}
-                <div className="relative w-full aspect-video rounded-[2rem] overflow-hidden border border-vintage-tan/30 bg-vintage-cream/30 shadow-lux">
+                <div className="relative w-full max-w-md aspect-video rounded-[1rem] overflow-hidden border border-vintage-tan/30 bg-vintage-cream/30 shadow-lux mx-auto">
+                   {!imageLoaded[idx] && (
+                     <div className="absolute inset-0 bg-vintage-cream/50 animate-pulse flex items-center justify-center">
+                       <div className="w-8 h-8 border-2 border-vintage-tan/30 border-t-vintage-plum rounded-full animate-spin"></div>
+                     </div>
+                   )}
                    <img 
                     src={`/images/schedule-${idx + 1}.jpeg`}
-                    className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-1000"
+                    className={`w-full h-full object-cover object-top hover:scale-105 transition-transform duration-1000 ${imageLoaded[idx] ? 'opacity-100' : 'opacity-0'}`}
+                    loading="lazy"
+                    onLoad={() => setImageLoaded(prev => ({ ...prev, [idx]: true }))}
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = HERO_IMAGES[idx % HERO_IMAGES.length];
+                      const target = e.target as HTMLImageElement;
+                      // Try fallback to hero images
+                      if (target.src.includes('schedule-')) {
+                        target.src = HERO_IMAGES[idx % HERO_IMAGES.length];
+                      } else {
+                        // Final fallback - show placeholder
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="flex items-center justify-center h-full bg-vintage-cream/50">
+                              <div class="text-center">
+                                <Calendar class="mx-auto mb-2 text-vintage-plum/50" size={32} />
+                                <p class="text-vintage-plum/50 text-sm">Image unavailable</p>
+                              </div>
+                            </div>
+                          `;
+                        }
+                      }
+                      setImageLoaded(prev => ({ ...prev, [idx]: true }));
                     }}
                   />
                 </div>
@@ -269,10 +354,32 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           setMusicPlaying(true); 
         }
       } catch (error) {
-        alert('Please click again to enable music');
+        console.log('Music autoplay prevented, will play on user interaction');
       }
     }
   };
+
+  useEffect(() => {
+    const startMusicOnInteraction = () => {
+      if (audioRef.current && !musicPlaying) {
+        audioRef.current.play().then(() => {
+          setMusicPlaying(true);
+        }).catch(() => {
+          console.log('Music autoplay blocked');
+        });
+      }
+      document.removeEventListener('click', startMusicOnInteraction);
+      document.removeEventListener('touchstart', startMusicOnInteraction);
+    };
+
+    document.addEventListener('click', startMusicOnInteraction);
+    document.addEventListener('touchstart', startMusicOnInteraction);
+    
+    return () => {
+      document.removeEventListener('click', startMusicOnInteraction);
+      document.removeEventListener('touchstart', startMusicOnInteraction);
+    };
+  }, [musicPlaying]);
 
   const handleRSVPSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -302,14 +409,6 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
            <button onClick={toggleMusic} className="w-14 h-14 rounded-full bg-vintage-cream/80 border-2 border-vintage-tan flex items-center justify-center shadow-lux group">
               <Music size={24} className={musicPlaying ? "text-vintage-plum group-hover:text-white" : "text-vintage-plum/40"} />
            </button>
-           <motion.button 
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowRSVP(true)} 
-              disabled={!state.rsvpOpen}
-              className={`py-4 px-10 rounded-full shadow-lux font-bold tracking-[0.4em] uppercase text-[10px] flex items-center justify-center gap-4 border-2 ${state.rsvpOpen ? 'bg-vintage-plum text-white border-vintage-tan' : 'bg-vintage-cream text-vintage-plum/40 border-vintage-plum/10'}`}
-            >
-              {state.rsvpOpen ? <><Zap size={16} fill="currentColor" /> RSVP</> : 'CLOSED'}
-            </motion.button>
         </div>
 
         <div className="absolute inset-0 z-0 opacity-40">
@@ -321,33 +420,36 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }} 
               transition={{ duration: 4 }} 
-              className="absolute inset-0 w-full h-full object-cover object-top grayscale" 
+              className="absolute inset-0 w-full h-full object-cover object-top scale-100 grayscale opacity-50" 
             />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-b from-vintage-bg/40 via-transparent to-vintage-bg" />
+          <div className="absolute inset-0 bg-gradient-to-b from-vintage-bg/20 via-transparent to-vintage-bg/60" />
         </div>
 
         <motion.div 
           initial={{ opacity: 0, y: 30 }} 
           animate={{ opacity: 1, y: 0 }} 
           transition={{ duration: 1.5 }}
-          className="relative z-10 text-center px-6 max-w-5xl flex flex-col items-center"
+          className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[60vh]"
         >
-          <p className="text-vintage-plum font-serif italic text-lg md:text-2xl mb-12 leading-relaxed text-visible-edge">
-            “I have found the one whom my soul loves”
-            <br/>
-            <span className="text-[11px] font-bold uppercase tracking-[0.6em] text-vintage-plum mt-5 inline-block">— Song of Solomon 3:4</span>
-          </p>
+          <div className="space-y-8 md:space-y-12">
+            <p className="text-vintage-plum font-serif italic text-xl md:text-3xl leading-relaxed text-visible-edge drop-shadow-lg">
+              "I have found the one whom my soul loves"
+              <br/>
+              <span className="text-[11px] font-bold uppercase tracking-[0.6em] text-vintage-plum/80 mt-6 inline-block">— Song of Solomon 3:4</span>
+            </p>
 
-          <div className="relative mb-12 flex flex-col items-center">
-            <p className="text-white/60 uppercase tracking-[0.6em] text-[10px] font-bold mb-10">Join us as we say</p>
-            <h1 className="text-7xl md:text-[10rem] font-bold font-serif tracking-tighter select-none relative text-center text-vintage-plum">
-              I DO
-            </h1>
+            <div className="space-y-6">
+              <p className="text-white/90 uppercase tracking-[0.8em] text-[10px] font-bold">Join us as we say</p>
+              <h1 className="text-8xl md:text-[12rem] font-bold font-serif tracking-tighter select-none relative text-center text-vintage-plum drop-shadow-2xl">
+                I DO
+              </h1>
+            </div>
+
+            <div className="ornamental-line mx-auto max-w-sm" />
+            
+            <CountdownTimer targetDate="2026-05-16T12:00:00" />
           </div>
-
-          <div className="ornamental-line mx-auto mb-8 max-w-xs" />
-          <CountdownTimer targetDate="2026-05-16T12:00:00" />
         </motion.div>
       </section>
 
@@ -373,7 +475,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                   src={journeyImg === 0 ? "/images/hero-2.jpeg" : journeyImg === 1 ? "/images/hero-4.jpeg" : journeyImg === 2 ? "/images/hero-5.jpeg" : "/images/hero-6.jpeg"} 
                   initial={{ opacity: 0 }} 
                   animate={{ 
-                    opacity: 0.6,
+                    opacity: 1,
                     filter: isJourneyHovered ? "grayscale(0%)" : "grayscale(100%)"
                   }} 
                   exit={{ opacity: 0 }} 
@@ -381,139 +483,109 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                   className="w-full h-full object-cover object-top" 
                 />
               </AnimatePresence>
-            </div>
-
-            <div className="relative flex flex-col items-center justify-center p-16 md:p-28 text-center text-vintage-plum space-y-14 z-10">
-              <div className="space-y-5">
-                <p className="font-serif italic text-4xl md:text-6xl tracking-tight text-visible-edge">Geraldine Rumbidzai</p>
-                <p className="text-[12px] font-bold uppercase tracking-[0.5em] text-black opacity-80">3rd born of Mr and Mrs Kagowa</p>
+          </div>
+          
+            <div className="relative flex flex-col items-center justify-center p-8 md:p-16 text-center space-y-6 z-10">
+              <div className="space-y-1">
+                <p className="font-serif italic text-4xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg">Geraldine Rumbidzai</p>
+                <p className="text-[12px] font-bold uppercase tracking-[0.4em] text-black">3rd born of Mr and Mrs Kagowa</p>
               </div>
               
-              <div className="text-4xl font-serif italic text-black/20">— and —</div>
+              <div className="text-4xl md:text-5xl font-serif italic text-vintage-plum/40">— and —</div>
 
-              <div className="space-y-5">
-                <p className="font-serif italic text-4xl md:text-6xl tracking-tight text-visible-edge">Brighton Tapiwa</p>
-                <p className="text-[12px] font-bold uppercase tracking-[0.5em] text-black opacity-80">1st born of Mr and Mrs Mutsekwa</p>
+              <div className="space-y-1">
+                <p className="font-serif italic text-4xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg">Brighton Tapiwa</p>
+                <p className="text-[12px] font-bold uppercase tracking-[0.4em] text-black">1st born of Mr and Mrs Mutsekwa</p>
               </div>
-
+              
               <div className="ornamental-line max-w-xs" />
 
-              <p className="text-lg font-light leading-relaxed max-w-md tracking-wide text-black/70 italic text-visible-edge">
+              <p className="text-xl md:text-2xl font-normal leading-relaxed max-w-lg tracking-wide text-vintage-plum/90 italic drop-shadow-md">
                 Together with their families invite you to celebrate their marriage
               </p>
               
-              <div className="space-y-4">
-                <p className="text-4xl md:text-5xl font-serif italic text-visible-edge">Saturday 16 May 2026</p>
-                <p className="text-[14px] font-bold uppercase tracking-[0.8em] text-black/80">12 Noon Sharp</p>
+              <div className="space-y-1">
+                <p className="text-4xl md:text-5xl font-serif italic text-vintage-plum drop-shadow-lg">Saturday 16 May 2026</p>
+                <p className="text-[14px] font-bold uppercase tracking-[0.6em] text-black">12 Noon Sharp</p>
               </div>
 
-              <div className="pt-10">
-                <p className="text-[11px] font-bold uppercase tracking-[0.6em] text-black/40 mb-4">The Venue</p>
-                <p className="text-3xl font-serif italic border-b border-vintage-tan/40 pb-3 px-6 inline-block text-visible-edge">Umwinzii, Harare</p>
+              <div className="pt-3">
+                <p className="text-[12px] font-bold uppercase tracking-[0.4em] text-black mb-1">The Venue</p>
+                <p className="text-3xl md:text-4xl font-serif italic text-vintage-plum drop-shadow-lg">Umwinzii, Harare</p>
+              </div>
+              
+              {/* Compact Quick Info Bar */}
+              <div className="mt-3 pt-3 border-t border-vintage-plum/20 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+                <div className="space-y-1">
+                  <p className="text-[12px] font-bold uppercase tracking-[0.3em] text-black">RSVP Contact</p>
+                  <a href="tel:+263772100875" className="text-base font-serif italic text-black hover:text-vintage-plum transition-colors cursor-pointer">Yvonne • +263 7 72100875</a>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[12px] font-bold uppercase tracking-[0.3em] text-black">Dress Code</p>
+                  <p className="text-base font-serif italic text-black">Black Tie</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[12px] font-bold uppercase tracking-[0.3em] text-black">RSVP By</p>
+                  <p className="text-base font-serif italic text-black">28 Feb 2026</p>
+                </div>
               </div>
             </div>
           </motion.div>
         </section>
 
-        {/* Interactive Timeline */}
-        <section>
-          <InteractiveTimeline schedule={state.schedule} />
-        </section>
-
-        {/* Guest Information */}
-        <section>
-          <div className="flex items-center gap-6 mb-16">
-            <div className="p-4 rounded-full bg-vintage-cream border border-vintage-tan shadow-sm">
-              <Plane className="text-vintage-plum" size={24} />
-            </div>
-            <div>
-              <h3 className="text-5xl font-serif italic text-vintage-plum">Important Details</h3>
-              <p className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-tan mt-3">Dress Code & Logistics</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="bg-vintage-cream/60 p-12 rounded-[3.5rem] shadow-lux border border-vintage-tan/20 space-y-8 relative">
-              <h4 className="text-3xl font-serif italic text-vintage-plum border-l-2 border-vintage-tan pl-6">Dress Code</h4>
-              <p className="text-vintage-plum/80 text-lg leading-relaxed italic">
-                Black tie - polished, glamorous and unforgettable. Bring the glam and we'll bring the love
-              </p>
-              <div className="pt-6">
-                <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-vintage-plum/40 mb-3">RSVP Deadline</p>
-                <p className="text-lg font-serif italic">Kindly RSVP by 28 February 2026</p>
+        {/* Transportation Details */}
+        <section className="relative z-10">
+          <div className="bg-vintage-cream/60 rounded-[2rem] p-8 md:p-12 border border-vintage-tan/30 text-center space-y-6">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full bg-vintage-plum/10 flex items-center justify-center">
+                <Car className="text-vintage-plum" size={20} />
               </div>
+              <h3 className="text-2xl md:text-3xl font-serif italic text-vintage-plum">Transportation</h3>
             </div>
-            <div className="bg-vintage-plum p-12 rounded-[3.5rem] shadow-lux border border-vintage-tan/30 space-y-10 text-white relative">
-              <div className="space-y-4">
-                <p className="text-[11px] font-bold text-vintage-tan uppercase tracking-[0.5em]">Transportation</p>
-                <p className="text-lg font-serif italic tracking-wide">
-                  Shuttles will be available from town and bride and groom's residences
-                </p>
-              </div>
-              <div className="ornamental-line opacity-20" />
-              <div className="space-y-4">
-                <p className="text-[11px] font-bold text-vintage-tan uppercase tracking-[0.5em]">Contact</p>
-                <p className="text-lg font-serif italic tracking-wide">
-                  For RSVP and inquiries, please contact the wedding team
-                </p>
-              </div>
-            </div>
+            <p className="text-vintage-plum/80 italic text-base md:text-lg">Shuttles available from town and residences</p>
           </div>
         </section>
 
-        {/* Location */}
-        <section className="relative">
-          <div className="flex items-center gap-6 mb-16">
-            <div className="p-4 rounded-full bg-vintage-cream border border-vintage-tan shadow-sm">
-              <MapPin className="text-vintage-plum" size={24} />
-            </div>
-            <div>
-              <h3 className="text-5xl font-serif italic text-vintage-plum">Location</h3>
-              <p className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-tan mt-3">Find Your Way</p>
-            </div>
-          </div>
-          <div className="aspect-square rounded-[1rem] overflow-hidden shadow-lux border border-vintage-tan/20">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15197.808249852234!2d31.14488585!3d-17.72337775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1931a5758364843b%3A0x6b47c0b484594c35!2sVenue%20Umwinzii!5e0!3m2!1sen!2szw!4v1715600000000!5m2!1sen!2szw" className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-1000" />
+        {/* Wedding Details Section */}
+        <section className="space-y-32">
+          {/* Interactive Timeline */}
+          <div>
+            <InteractiveTimeline schedule={state.schedule} />
           </div>
         </section>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-48 border-t border-vintage-tan/20 bg-vintage-cream/10 py-32 text-center space-y-24">
-        <div className="space-y-8">
-          <h3 className="text-6xl font-serif italic text-vintage-plum tracking-tight">The Concierge</h3>
-          <p className="text-vintage-plum/60 font-serif text-2xl italic max-w-2xl mx-auto px-6">
-            Assisting you with every fine detail for the union.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 max-w-4xl mx-auto px-8">
-          <button className="flex flex-col items-center gap-6">
-            <div className="w-20 h-20 rounded-full bg-vintage-cream flex items-center justify-center text-vintage-plum border border-vintage-tan shadow-lux">
-              <MessageSquare size={28} />
-            </div>
-            <span className="text-[11px] font-bold text-vintage-plum uppercase tracking-[0.4em]">Digital Chat</span>
-          </button>
-          
-          <ElevenLabsVoice agentId={state.elevenLabsAgentId} />
-
-          <button 
-            onClick={() => window.open('tel:+263772100875', '_self')}
-            className="flex flex-col items-center gap-6 group"
-          >
-            <div className="w-20 h-20 rounded-full bg-vintage-cream flex items-center justify-center text-vintage-plum border border-vintage-tan shadow-lux group-hover:bg-vintage-plum group-hover:text-white transition-all">
-              <Phone size={28} />
-            </div>
-            <span className="text-[11px] font-bold text-vintage-plum uppercase tracking-[0.4em]">Contact Team</span>
-            <span className="text-[10px] text-vintage-plum/60 font-medium">+263772100875</span>
-          </button>
-        </div>
-        
-        <div className="pt-12">
-          <p className="text-white font-serif text-xl italic px-6">
-            "Love, laughter and happily ever after 💕"
-          </p>
-        </div>
+      {/* Simple Footer */}
+      <footer className="mt-32 border-t border-vintage-tan/20 bg-vintage-cream/10 py-16 text-center">
+        <p className="text-vintage-plum/60 font-serif text-lg italic px-6">
+          "Love, laughter and happily ever after with you 💕"
+        </p>
       </footer>
+
+      {/* Floating RSVP Button */}
+      <div className="fixed bottom-8 right-8 z-40">
+        <motion.button 
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowRSVP(true)} 
+          disabled={!state.rsvpOpen}
+          className={`py-4 px-8 rounded-full shadow-lux font-bold tracking-[0.4em] uppercase text-[10px] flex items-center justify-center gap-3 border-2 ${state.rsvpOpen ? 'bg-vintage-plum text-white border-vintage-tan' : 'bg-vintage-cream text-vintage-plum/40 border-vintage-plum/10'}`}
+        >
+          {state.rsvpOpen ? <><Zap size={16} fill="currentColor" /> RSVP</> : 'CLOSED'}
+        </motion.button>
+      </div>
+
+      {/* Scroll Indicator */}
+      <div className="fixed bottom-8 left-8 z-40">
+        <motion.button 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          whileHover={{ y: -2 }}
+          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          className="w-12 h-12 rounded-full bg-vintage-cream/80 border-2 border-vintage-tan flex items-center justify-center shadow-lux"
+        >
+          <ChevronDown className="text-vintage-plum" size={20} />
+        </motion.button>
+      </div>
 
       {/* RSVP Modal */}
       <AnimatePresence>

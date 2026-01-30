@@ -88,10 +88,10 @@ app.get('/api/state', async (req, res) => {
           adminPassword: '1234',
           elevenLabsAgentId: '',
           schedule: [
-            { time: '12:00 PM', event: 'Wedding Ceremony', icon: 'heart', detail: 'The exchange of vows and rings in the presence of God and loved ones.' },
-            { time: '02:00 PM', event: 'Photography & Cocktails', icon: 'chef-hat', detail: 'Enjoy refreshments as we capture memories in the gardens.' },
-            { time: '03:30 PM', event: 'Wedding Reception', icon: 'music', detail: 'A celebratory feast with music, dancing, and heartfelt toasts.' },
-            { time: '08:00 PM', event: 'First Dance & Celebration', icon: 'heart-handshake', detail: 'The party begins in earnest! Let the celebration continue.' }
+            { time: '12:00 PM - 1:00 PM', event: 'Arrival of Guests', icon: 'heart', detail: 'Welcome to the celebration! Guests arrive and are greeted with refreshments as we gather for this special day.' },
+            { time: '1:00 PM - 3:00 PM', event: 'Wedding Ceremony', icon: 'heart-handshake', detail: 'The sacred exchange of vows and rings in the presence of God and loved ones. The moment we become one.' },
+            { time: '3:00 PM - 4:00 PM', event: 'Cocktail Hour', icon: 'chef-hat', detail: 'Enjoy cocktails and hors d\'oeuvres as we capture beautiful memories and celebrate the newlyweds.' },
+            { time: '4:00 PM onwards', event: 'Wedding Reception', icon: 'music', detail: 'A grand celebration with dining, dancing, heartfelt toasts, and the beginning of our forever together.' }
           ],
           questions: [
             { fieldId: '1', label: 'Dietary Requirements', type: 'text', required: false },
