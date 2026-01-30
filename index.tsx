@@ -313,8 +313,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
 
   useEffect(() => {
     const audioSources = [
-      'https://www.bensound.com/bensound-music/bensound-romantic.mp3', 
-      '/audio/wedding-music.mp3' 
+      '/audio/wedding-music-trim.mp3' 
     ];
     
     const audio = new Audio();
