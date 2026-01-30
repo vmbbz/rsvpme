@@ -586,37 +586,35 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           <ChevronDown className="text-vintage-plum" size={20} />
         </motion.button>
       </div>
-
-      {/* RSVP Modal */}
       <AnimatePresence>
         {showRSVP && (
-          <div className="fixed inset-0 z-[300] bg-vintage-plum/85 backdrop-blur-xl flex items-center justify-center p-6 overflow-y-auto">
-            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="bg-vintage-cream w-full max-w-2xl rounded-[3rem] p-10 md:p-20 shadow-lux border border-vintage-tan/30 relative">
-              <button onClick={() => setShowRSVP(false)} className="absolute top-8 right-8 w-12 h-12 bg-vintage-plum text-white rounded-full flex items-center justify-center shadow-lg"><X size={24} /></button>
+          <div className="fixed inset-0 z-[300] bg-vintage-plum/85 backdrop-blur-xl flex items-center justify-center p-2 overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="bg-vintage-cream w-full max-w-md rounded-[1.5rem] p-4 md:p-6 shadow-lux border border-vintage-tan/30 relative max-h-[80vh] overflow-y-auto">
+              <button onClick={() => setShowRSVP(false)} className="absolute top-2 right-2 w-8 h-8 bg-vintage-plum text-white rounded-full flex items-center justify-center shadow-lg z-10"><X size={16} /></button>
               
-              <div className="mb-16">
-                <h3 className="text-5xl font-serif italic text-vintage-plum mb-4">The RSVP</h3>
-                <p className="text-vintage-tan text-[10px] font-bold uppercase tracking-[0.5em]">Kindly respond by Feb 2026</p>
+              <div className="mb-6">
+                <h3 className="text-2xl md:text-3xl font-serif italic text-vintage-plum mb-1">The RSVP</h3>
+                <p className="text-vintage-tan text-[8px] font-bold uppercase tracking-[0.4em]">Kindly respond by Feb 2026</p>
               </div>
               
-              <form onSubmit={handleRSVPSubmit} className="space-y-10">
-                <div className="space-y-4">
-                  <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-6">Full Name</label>
-                  <input name="name" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-6 text-xl font-serif italic" placeholder="..." />
+              <form onSubmit={handleRSVPSubmit} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Full Name</label>
+                  <input name="name" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="..." />
                 </div>
-                <div className="space-y-4">
-                  <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-6">WhatsApp Number</label>
-                  <input name="phone" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-6 text-xl font-serif italic" placeholder="..." />
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">WhatsApp Number</label>
+                  <input name="phone" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="..." />
                 </div>
 
                 {state.questions.map(q => (
-                  <div key={q.fieldId} className="space-y-4">
-                    <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-6">{q.label}</label>
-                    <input name={q.fieldId} className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-6 text-xl font-serif italic" placeholder="..." />
+                  <div key={q.fieldId} className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">{q.label}</label>
+                    <input name={q.fieldId} className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="..." />
                   </div>
                 ))}
                 
-                <button type="submit" className="w-full py-6 bg-vintage-plum text-white rounded-full font-bold uppercase tracking-[0.6em] text-xs shadow-lux border border-vintage-tan/30">
+                <button type="submit" className="w-full py-3 bg-vintage-plum text-white rounded-full font-bold uppercase tracking-[0.5em] text-xs shadow-lux border border-vintage-tan/30">
                   Confirm Attendance
                 </button>
               </form>
