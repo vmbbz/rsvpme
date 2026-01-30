@@ -38,7 +38,7 @@ const SettingsSchema = new mongoose.Schema({
 
 const GuestSchema = new mongoose.Schema({
   name: String,
-  phone: String,
+  attendingWith: String,
   guests: Number,
   answers: Map,
   timestamp: { type: Number, default: Date.now },
@@ -46,7 +46,7 @@ const GuestSchema = new mongoose.Schema({
 });
 
 const LogSchema = new mongoose.Schema({
-  guestPhone: String,
+  guestName: String,
   summary: String,
   type: { type: String, enum: ['text', 'voice', 'whatsapp'] },
   timestamp: { type: Number, default: Date.now },
@@ -160,7 +160,7 @@ app.post('/api/state', async (req, res) => {
       // Log new RSVP responses
       if (newResponse) {
         await Guest.create(newResponse);
-        console.log(`📝 New RSVP from ${newResponse.name} (${newResponse.phone})`);
+        console.log(`📝 New RSVP from ${newResponse.name} (attending with: ${newResponse.attendingWith || 'alone'})`);
       }
     }
     return res.json({ success: true });

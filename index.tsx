@@ -389,7 +389,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
     await API.updateState({ 
       newResponse: {
         name: fd.get('name'),
-        phone: fd.get('phone'),
+        attendingWith: fd.get('attendingWith'),
         guests: parseInt(fd.get('count') as string || '1'),
         answers
       }
@@ -499,7 +499,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                 </div>
               </div>
               
-              <div className="ornamental-line max-w-xs mb-4 md:mb-0" />
+              <div className="ornamental-line max-w-xs mb-2 md:mb-0" />
 
               <p className="text-xl md:text-2xl font-normal leading-relaxed max-w-lg tracking-wide text-vintage-plum/90 italic drop-shadow-md mb-4 md:mb-0">
                 Together with their families invite you to celebrate their marriage
@@ -605,8 +605,8 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                   <input name="name" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="..." />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">WhatsApp Number</label>
-                  <input name="phone" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="..." />
+                  <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Who are you attending with?</label>
+                  <input name="attendingWith" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="Names of guests you're coming with..." />
                 </div>
 
                 {state.questions.map(q => (
@@ -662,7 +662,7 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
               <tr key={i} className="border-b border-vintage-tan/5 hover:bg-white/20 transition-colors">
                 <td className="p-10">
                   <p className="font-serif italic text-3xl text-vintage-plum">{r.name}</p>
-                  <p className="text-vintage-tan font-bold mt-1 text-[10px] uppercase tracking-[0.2em]">{r.phone}</p>
+                  <p className="text-vintage-tan font-bold mt-1 text-[10px] uppercase tracking-[0.2em]">{r.attendingWith || 'Attending alone'}</p>
                 </td>
                 <td className="p-10 text-center">
                   <span className="text-2xl font-serif italic text-vintage-plum">{r.guests}</span>
