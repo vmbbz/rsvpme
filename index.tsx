@@ -604,6 +604,64 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
           </motion.div>
         </section>
 
+        {/* Gift Information Section */}
+        <section className="relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 1.2 }}
+            className="bg-gradient-to-br from-vintage-cream/80 to-vintage-bg/40 rounded-[3rem] p-8 md:p-16 border border-vintage-tan/30 shadow-lux relative overflow-hidden"
+          >
+            {/* Decorative corner elements */}
+            <div className="absolute top-4 left-4 w-16 h-16 border-t-2 border-l-2 border-vintage-plum/20 rounded-tl-2xl" />
+            <div className="absolute top-4 right-4 w-16 h-16 border-t-2 border-r-2 border-vintage-plum/20 rounded-tr-2xl" />
+            <div className="absolute bottom-4 left-4 w-16 h-16 border-b-2 border-l-2 border-vintage-plum/20 rounded-bl-2xl" />
+            <div className="absolute bottom-4 right-4 w-16 h-16 border-b-2 border-r-2 border-vintage-plum/20 rounded-br-2xl" />
+            
+            <div className="relative z-10 text-center space-y-8">
+              {/* Gift Icon */}
+              <div className="flex items-center justify-center gap-6 mb-8">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-vintage-plum/10 to-vintage-tan/10 flex items-center justify-center border-2 border-vintage-tan/30 shadow-inner">
+                  <HeartHandshake className="text-vintage-plum" size={32} />
+                </div>
+                <h3 className="text-3xl md:text-4xl font-serif italic text-vintage-plum">Gift Registry</h3>
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-vintage-plum/10 to-vintage-tan/10 flex items-center justify-center border-2 border-vintage-tan/30 shadow-inner">
+                  <HeartHandshake className="text-vintage-plum" size={32} />
+                </div>
+              </div>
+              
+              {/* Main Message */}
+              <div className="max-w-2xl mx-auto space-y-6">
+                <p className="text-xl md:text-2xl font-serif italic text-vintage-plum/90 leading-relaxed">
+                  Your presence at our celebration is the greatest gift we could ever wish for.
+                </p>
+                
+                <div className="ornamental-line max-w-xs mx-auto" />
+                
+                <p className="text-lg md:text-xl font-light text-vintage-plum/80 leading-relaxed">
+                  For those who wish to honor us with a gift, we would graciously appreciate cash contributions to help us begin our new journey together.
+                </p>
+                
+                <div className="bg-vintage-plum/5 rounded-2xl p-6 md:p-8 border border-vintage-tan/20">
+                  <div className="flex items-center justify-center gap-3 mb-4">
+                    <Ribbon className="text-vintage-plum" size={20} />
+                    <span className="text-sm font-bold uppercase tracking-[0.4em] text-vintage-plum">Gift Details</span>
+                    <Ribbon className="text-vintage-plum" size={20} />
+                  </div>
+                  <p className="text-base md:text-lg text-vintage-plum/80 italic">
+                    Elegant envelopes and a gift register will be available at the venue for your convenience. Parents and close family members will have the privilege to share their heartfelt speeches and present their gifts during the celebration.
+                  </p>
+                </div>
+                
+                <p className="text-sm md:text-base font-light text-vintage-plum/60 italic">
+                  With love and deepest gratitude,<br />
+                  Geraldine & Tapiwa
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </section>
+
         {/* Transportation Details */}
         <section className="relative z-10">
           <div className="bg-vintage-cream/60 rounded-[2rem] p-8 md:p-12 border border-vintage-tan/30 text-center space-y-6">
@@ -620,9 +678,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
         {/* Wedding Details Section */}
         <section className="space-y-32">
           {/* Interactive Timeline */}
-          <div>
-            <InteractiveTimeline schedule={state.schedule} />
-          </div>
+          <InteractiveTimeline schedule={state.schedule} />
         </section>
       </div>
 
