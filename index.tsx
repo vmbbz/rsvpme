@@ -130,10 +130,10 @@ const InteractiveTimeline = () => {
 
   // Static schedule data - NO SERVER FETCHING
   const schedule = [
-    { time: '12:00 PM - 1:00 PM', event: 'Arrival of Guests', icon: 'heart', detail: 'Welcome to the celebration! Guests arrive and are greeted with refreshments as we gather for this special day.' },
-    { time: '1:00 PM - 3:00 PM', event: 'Wedding Ceremony', icon: 'heart-handshake', detail: 'The sacred exchange of vows and rings in the presence of God and loved ones. The moment we become one.' },
-    { time: '3:00 PM - 4:00 PM', event: 'Cocktail Hour', icon: 'chef-hat', detail: 'Enjoy cocktails and hors d\'oeuvres as we capture beautiful memories and celebrate the newlyweds.' },
-    { time: '4:00 PM onwards', event: 'Wedding Reception', icon: 'music', detail: 'A grand celebration with dining, dancing, heartfelt toasts, and the beginning of our forever together.' }
+    { time: '12:00 PM - 1:00 PM', event: 'Guest Arrival', icon: 'heart', detail: 'Welcome refreshments as guests gather for the celebration.' },
+    { time: '1:00 PM - 3:00 PM', event: 'Wedding Ceremony', icon: 'heart-handshake', detail: 'Sacred vows and rings exchanged. We become one.' },
+    { time: '3:00 PM - 4:00 PM', event: 'Cocktail Hour', icon: 'chef-hat', detail: 'Drinks, hors d\'oeuvres, and photo memories.' },
+    { time: '4:00 PM onwards', event: 'Wedding Reception', icon: 'music', detail: 'Dining, dancing, toasts, and our forever begins.' }
   ];
 
   useEffect(() => {
