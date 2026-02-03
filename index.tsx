@@ -555,6 +555,23 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                 <div className="space-y-1">
                   <p className="text-[12px] font-bold uppercase tracking-[0.3em] text-black">Dress Code</p>
                   <p className="text-base font-serif italic text-black">Black Tie</p>
+                  <div className="flex justify-center gap-2 mt-2">
+                    <div 
+                      className="w-6 h-6 rounded-full border-2 border-black/20 shadow-sm" 
+                      style={{ backgroundColor: '#2c1f26' }}
+                      title="Black"
+                    />
+                    <div 
+                      className="w-6 h-6 rounded-full border-2 border-black/20 shadow-sm" 
+                      style={{ backgroundColor: '#503140' }}
+                      title="Brown"
+                    />
+                    <div 
+                      className="w-6 h-6 rounded-full border-2 border-black/20 shadow-sm" 
+                      style={{ backgroundColor: '#d3ab9f' }}
+                      title="Light Brown"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[12px] font-bold uppercase tracking-[0.3em] text-black">RSVP By</p>
