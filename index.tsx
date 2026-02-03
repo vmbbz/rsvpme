@@ -123,24 +123,18 @@ const ElevenLabsVoice = ({ agentId }: { agentId: string }) => {
   );
 };
 
-const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) => {
+const InteractiveTimeline = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [hasError, setHasError] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>({});
 
-  useEffect(() => {
-    try {
-      if (!schedule || schedule.length === 0) {
-        setHasError(true);
-      } else {
-        setHasError(false);
-      }
-    } catch (error) {
-      console.error('Timeline error:', error);
-      setHasError(true);
-    }
-  }, [schedule]);
+  // Static schedule data - NO SERVER FETCHING
+  const schedule = [
+    { time: '12:00 PM - 1:00 PM', event: 'Arrival of Guests', icon: 'heart', detail: 'Welcome to the celebration! Guests arrive and are greeted with refreshments as we gather for this special day.' },
+    { time: '1:00 PM - 3:00 PM', event: 'Wedding Ceremony', icon: 'heart-handshake', detail: 'The sacred exchange of vows and rings in the presence of God and loved ones. The moment we become one.' },
+    { time: '3:00 PM - 4:00 PM', event: 'Cocktail Hour', icon: 'chef-hat', detail: 'Enjoy cocktails and hors d\'oeuvres as we capture beautiful memories and celebrate the newlyweds.' },
+    { time: '4:00 PM onwards', event: 'Wedding Reception', icon: 'music', detail: 'A grand celebration with dining, dancing, heartfelt toasts, and the beginning of our forever together.' }
+  ];
 
   useEffect(() => {
     const checkMobile = () => {
@@ -150,39 +144,6 @@ const InteractiveTimeline = ({ schedule }: { schedule: AppState['schedule'] }) =
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  if (hasError) {
-    return (
-      <div className="space-y-16 py-20 relative">
-        <div className="flex items-center gap-6 mb-16 px-4">
-          <div className="p-4 rounded-full bg-vintage-cream border border-vintage-tan shadow-sm">
-            <Clock className="text-vintage-plum" size={24} />
-          </div>
-          <div>
-            <h3 className="text-5xl font-serif italic text-vintage-plum">The Celebration</h3>
-            <p className="text-[11px] font-bold uppercase tracking-[0.5em] text-vintage-tan mt-3">A Chronicle of Joy</p>
-          </div>
-        </div>
-        
-        <div className="bg-vintage-cream/60 rounded-[2rem] p-12 text-center border border-vintage-tan/30">
-          <div className="space-y-6">
-            <div className="w-16 h-16 mx-auto rounded-full bg-vintage-plum/10 flex items-center justify-center">
-              <Calendar className="text-vintage-plum" size={32} />
-            </div>
-            <h4 className="text-2xl font-serif italic text-vintage-plum">Schedule Loading</h4>
-            <p className="text-vintage-plum/70 max-w-md mx-auto">
-              The wedding schedule is currently being updated. Please check back soon for the complete celebration timeline.
-            </p>
-            <div className="pt-4">
-              <p className="text-sm text-vintage-plum/50">
-                Saturday 16 May 2026 • 12 Noon Sharp • Umwinzii, Harare
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-16 py-20 relative">
@@ -573,7 +534,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               <p className="text-xl md:text-2xl font-normal leading-relaxed max-w-lg tracking-wide text-vintage-plum/90 italic drop-shadow-md mb-4 md:mb-0">
                 Together with their families invite you to celebrate their marriage
               </p>
-　　 　 　 　
+　　 　 　
               <div className="space-y-2 md:space-y-1 mb-4 md:mb-0">
                 <p className="text-3xl md:text-5xl font-serif italic text-vintage-plum drop-shadow-lg"><span className="md:hidden">Sat</span><span className="hidden md:inline">Saturday</span> 16 May 2026</p>
                 <p className="text-[13px] md:text-[14px] font-bold uppercase tracking-[0.6em] text-black">12 Noon Sharp</p>
@@ -671,14 +632,14 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               </div>
               <h3 className="text-2xl md:text-3xl font-serif italic text-vintage-plum">Transportation</h3>
             </div>
-            <p className="text-vintage-plum/80 italic text-base md:text-lg">Shuttles available from town and residences</p>
+            <p className="text-vintage-plum/80 italic text-base md:text-lg">Shuttles available from bride's and groom's residences</p>
           </div>
         </section>
 
         {/* Wedding Details Section */}
         <section className="space-y-32">
           {/* Interactive Timeline */}
-          <InteractiveTimeline schedule={state.schedule} />
+          <InteractiveTimeline />
         </section>
       </div>
 
@@ -730,8 +691,8 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                   <input name="name" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="..." />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Who are you attending with?</label>
-                  <input name="attendingWith" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="Names of guests you're coming with..." />
+                  <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Who are you attending with? (Optional)</label>
+                  <input name="attendingWith" className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="Names of guests you're coming with..." />
                 </div>
 
                 {state.questions.map(q => (
