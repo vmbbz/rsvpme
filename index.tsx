@@ -48,9 +48,9 @@ const API = {
 };
 
 const HERO_IMAGES = [
-  "/images/hero-1.jpeg",
-  "/images/hero-7.jpeg",
-  "/images/hero-3.jpeg",
+  "/images/bero-1.jpeg",
+  "/images/bero-7.jpeg",
+  "/images/bero-3.jpeg",
 ];
 
 // --- COMPONENTS ---
@@ -501,7 +501,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               <AnimatePresence mode="wait">
                 <motion.img 
                   key={journeyImg} 
-                  src={journeyImg === 0 ? "/images/hero-2.jpeg" : journeyImg === 1 ? "/images/hero-4.jpeg" : journeyImg === 2 ? "/images/hero-5.jpeg" : "/images/hero-6.jpeg"} 
+                  src={journeyImg === 0 ? "/images/bero-2.jpeg" : journeyImg === 1 ? "/images/bero-4.jpeg" : journeyImg === 2 ? "/images/bero-5.jpeg" : "/images/hero-4.jpeg"} 
                   initial={{ opacity: 0 }} 
                   animate={{ 
                     opacity: 1,
@@ -710,6 +710,16 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Who are you attending with? (Optional)</label>
                   <input name="attendingWith" className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="Names of guests you're coming with..." />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Number of Guests</label>
+                  <select name="count" className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic">
+                    <option value="1">1 Guest</option>
+                    <option value="2">2 Guests</option>
+                    <option value="3">3 Guests</option>
+                    <option value="4">4 Guests</option>
+                    <option value="5">5+ Guests</option>
+                  </select>
                 </div>
 
                 {state.questions.map(q => (
