@@ -49,7 +49,7 @@ const API = {
 
 const HERO_IMAGES = [
   "/images/bero-1.jpeg",
-  "/images/bero-7.jpeg",
+  "/images/hero-7.jpeg",
   "/images/bero-3.jpeg",
 ];
 
