@@ -630,12 +630,11 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                   <p className="text-base md:text-lg text-vintage-plum/80 italic">
                     Elegant envelopes and a gift register will be available at the venue for your convenience. Parents and close family members will have the privilege to share their heartfelt speeches and present their gifts during the celebration.
                   </p>
+                  <p className="text-sm md:text-base font-light text-vintage-plum/60 italic">
+                    With love and deepest gratitude,<br />
+                    Geraldine & Tapiwa
+                  </p>
                 </div>
-                
-                <p className="text-sm md:text-base font-light text-vintage-plum/60 italic">
-                  With love and deepest gratitude,<br />
-                  Geraldine & Tapiwa
-                </p>
               </div>
             </div>
           </motion.div>
@@ -648,7 +647,14 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               <div className="w-12 h-12 rounded-full bg-vintage-plum/10 flex items-center justify-center">
                 <Car className="text-vintage-plum" size={20} />
               </div>
-              <h3 className="text-2xl md:text-3xl font-serif italic text-vintage-plum">Transportation</h3>
+              <h3 className="text-2xl md:text-3xl font-serif italic text-vintage-plum">Transportation & Accommodation</h3>
+            </div>
+            <div className="space-y-4 max-w-2xl mx-auto">
+              <p className="text-vintage-plum/90 font-semibold text-base md:text-lg">📍 Pooled transport from Harare CBD</p>
+              <p className="text-vintage-plum/70 italic text-sm md:text-base">Details to be revealed soon</p>
+              <div className="w-16 h-[1px] bg-vintage-tan/50 mx-auto my-4"></div>
+              <p className="text-vintage-plum/90 font-semibold text-base md:text-lg">🏠 AirBnB accommodation available</p>
+              <p className="text-vintage-plum/70 italic text-sm md:text-base">Booking details to be shared for those who need it</p>
             </div>
             <p className="text-vintage-plum/80 italic text-base md:text-lg">Shuttles available from bride's and groom's residences</p>
           </div>
