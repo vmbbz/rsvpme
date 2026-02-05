@@ -526,7 +526,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
 
                 <div className="space-y-2 md:space-y-1 md:text-center">
                   <p className="font-serif italic text-3xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg text-center md:text-left">Brighton Tapiwa</p>
-                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">1st bornof Mr and Mrs Mutsekwa</p>
+                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">1st born son of Mr and Mrs Mutsekwa</p>
                 </div>
               </div>
               
