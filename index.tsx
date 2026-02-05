@@ -211,13 +211,14 @@ const InteractiveTimeline = () => {
                 {/* Image */}
                 <div className="relative w-full max-w-md aspect-video rounded-[1rem] overflow-hidden border border-vintage-tan/30 bg-vintage-cream/30 shadow-lux mx-auto">
                    {!imageLoaded[idx] && (
-                     <div className="absolute inset-0 bg-vintage-cream/50 animate-pulse flex items-center justify-center">
+                     <div className="absolute inset-0 animate-pulse flex items-center justify-center" style={{ backgroundColor: '#e0d1d5' }}>
                        <div className="w-8 h-8 border-2 border-vintage-tan/30 border-t-vintage-plum rounded-full animate-spin"></div>
                      </div>
                    )}
                    <img 
-                    src={`/images/schedule-${idx + 1}.jpeg`}
+                    src={`/images/schedule-${idx + 4}.jpeg`}
                     className={`w-full h-full object-cover object-top hover:scale-105 transition-transform duration-1000 ${imageLoaded[idx] ? 'opacity-100' : 'opacity-0'}`}
+                    style={{ backgroundColor: '#e0d1d5' }}
                     loading="lazy"
                     onLoad={() => setImageLoaded(prev => ({ ...prev, [idx]: true }))}
                     onError={(e) => {
@@ -518,14 +519,14 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               <div className="flex flex-col md:flex-row md:items-center md:justify-center md:gap-8 w-full mb-4 md:mb-0">
                 <div className="space-y-2 md:space-y-1 md:text-center">
                   <p className="font-serif italic text-3xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg text-center md:text-left">Geraldine Rumbidzai</p>
-                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">3rd born of Mr and Mrs Kagowa</p>
+                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">3rd born daughter of Mr and Mrs Kagowa</p>
                 </div>
                 
                 <div className="text-3xl md:text-5xl font-serif italic text-vintage-plum/40 text-center md:text-center my-4 md:my-0">— and —</div>
 
                 <div className="space-y-2 md:space-y-1 md:text-center">
                   <p className="font-serif italic text-3xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg text-center md:text-left">Brighton Tapiwa</p>
-                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">1st born of Mr and Mrs Mutsekwa</p>
+                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">1st bornof Mr and Mrs Mutsekwa</p>
                 </div>
               </div>
               
