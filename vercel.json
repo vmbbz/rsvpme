@@ -19,8 +19,16 @@
       "dest": "/server.mjs"
     },
     {
-      "src": "/(.*)",
+      "src": "/admin",
       "dest": "/dist/index.html"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/dist/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/$1"
     }
   ]
 }
