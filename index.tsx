@@ -701,15 +701,15 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
       <AnimatePresence>
         {showRSVP && (
           <div className="fixed inset-0 z-[300] bg-vintage-plum/85 backdrop-blur-xl flex items-center justify-center p-2 overflow-y-auto">
-            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="bg-vintage-cream w-full max-w-md rounded-[1.5rem] p-4 md:p-6 shadow-lux border border-vintage-tan/30 relative max-h-[80vh] overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="bg-vintage-cream w-full max-w-md rounded-[1.5rem] p-3 md:p-6 shadow-lux border border-vintage-tan/30 relative max-h-[90vh] overflow-y-auto">
               <button onClick={() => setShowRSVP(false)} className="absolute top-2 right-2 w-8 h-8 bg-vintage-plum text-white rounded-full flex items-center justify-center shadow-lg z-10"><X size={16} /></button>
               
               <div className="mb-6">
                 <h3 className="text-2xl md:text-3xl font-serif italic text-vintage-plum mb-1">The RSVP</h3>
-                <p className="text-vintage-tan text-[8px] font-bold uppercase tracking-[0.4em]">Kindly respond by Feb 2026</p>
+                <p className="text-vintage-tan text-[8px] font-bold uppercase tracking-[0.4em]">Kindly respond by 28 Feb 2026</p>
               </div>
               
-              <form onSubmit={handleRSVPSubmit} className="space-y-4">
+              <form onSubmit={handleRSVPSubmit} className="space-y-3 md:space-y-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Full Name</label>
                   <input name="name" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="..." />
