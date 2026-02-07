@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 
 dotenv.config({ path: '.env.local' });
 
@@ -66,6 +67,81 @@ const Settings = mongoose.model('Settings', SettingsSchema);
 const Guest = mongoose.model('Guest', GuestSchema);
 const Log = mongoose.model('Log', LogSchema);
 const AdminLog = mongoose.model('AdminLog', AdminLogSchema);
+
+// Email transporter setup
+const transporter = nodemailer.createTransporter({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS
+  }
+});
+
+// Function to send RSVP notification email
+async function sendRSVPNotificationEmail(guestData) {
+  try {
+    const { name, attendingWith, guests, answers } = guestData;
+    
+    const emailContent = `
+      <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f5f2;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #5d4037; font-style: italic; margin-bottom: 10px;">New RSVP Received</h1>
+          <div style="width: 100px; height: 2px; background-color: #d7ccc8; margin: 0 auto;"></div>
+        </div>
+        
+        <div style="background-color: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;">
+          <h2 style="color: #5d4037; font-size: 24px; margin-bottom: 15px;">Guest Details</h2>
+          
+          <p style="margin: 10px 0; color: #3e2723;">
+            <strong>Name:</strong> ${name}
+          </p>
+          
+          <p style="margin: 10px 0; color: #3e2723;">
+            <strong>Party Size:</strong> ${guests} ${guests === 1 ? 'guest' : 'guests'}
+          </p>
+          
+          ${attendingWith ? `
+            <p style="margin: 10px 0; color: #3e2723;">
+              <strong>Attending With:</strong> ${attendingWith}
+            </p>
+          ` : ''}
+          
+          ${answers && Object.keys(answers).length > 0 ? `
+            <div style="margin-top: 20px;">
+              <h3 style="color: #5d4037; font-size: 18px; margin-bottom: 10px;">Additional Information:</h3>
+              ${Object.entries(answers).map(([key, value]) => `
+                <p style="margin: 8px 0; color: #3e2723;">
+                  <strong>${key}:</strong> ${value || 'Not specified'}
+                </p>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+          <p style="color: #5d4037; font-style: italic; font-size: 14px;">
+            Geraldine & Tapiwa's Wedding Celebration
+          </p>
+          <p style="color: #8d6e63; font-size: 12px; margin-top: 5px;">
+            Received: ${new Date().toLocaleString()}
+          </p>
+        </div>
+      </div>
+    `;
+
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: process.env.RSVP_EMAIL,
+      subject: `New RSVP: ${name} - Geraldine & Tapiwa's Wedding`,
+      html: emailContent
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`📧 RSVP notification email sent for ${name}`);
+  } catch (error) {
+    console.error('❌ Failed to send RSVP email:', error);
+  }
+}
 
 let dbConnected = false;
 mongoose.connect(MONGO_URI)
@@ -161,6 +237,9 @@ app.post('/api/state', async (req, res) => {
       if (newResponse) {
         await Guest.create(newResponse);
         console.log(`📝 New RSVP from ${newResponse.name} (attending with: ${newResponse.attendingWith || 'alone'})`);
+        
+        // Send email notification
+        await sendRSVPNotificationEmail(newResponse);
       }
     }
     return res.json({ success: true });
