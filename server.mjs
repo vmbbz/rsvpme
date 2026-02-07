@@ -69,7 +69,7 @@ const Log = mongoose.model('Log', LogSchema);
 const AdminLog = mongoose.model('AdminLog', AdminLogSchema);
 
 // Email transporter setup
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.GMAIL_USER,
