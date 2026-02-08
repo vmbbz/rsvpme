@@ -227,9 +227,15 @@ app.get('/api/state', async (req, res) => {
 
 app.post('/api/state', async (req, res) => {
   try {
+    const { newResponse, ...settingsData } = req.body;
+    
+    // Always try to send email first, regardless of DB connection
+    if (newResponse) {
+      console.log('📧 Attempting to send email notification...');
+      await sendRSVPNotificationEmail(newResponse);
+    }
+    
     if (dbConnected) {
-      const { newResponse, ...settingsData } = req.body;
-      
       // Log admin settings changes
       if (Object.keys(settingsData).length > 0) {
         // Get current settings for comparison
@@ -256,15 +262,18 @@ app.post('/api/state', async (req, res) => {
         await Settings.findOneAndUpdate({}, { $set: settingsData }, { upsert: true });
       }
       
-      // Log new RSVP responses
+      // Log new RSVP responses to database
       if (newResponse) {
         await Guest.create(newResponse);
-        console.log(`📝 New RSVP from ${newResponse.name} (attending with: ${newResponse.attendingWith || 'alone'})`);
-        
-        // Send email notification
-        await sendRSVPNotificationEmail(newResponse);
+        console.log(`📝 New RSVP from ${newResponse.name} (attending with: ${newResponse.attendingWith || 'alone'}) - saved to database`);
+      }
+    } else {
+      // Database not connected, but email was sent
+      if (newResponse) {
+        console.log(`⚠️ Database not connected, but email sent for ${newResponse.name}`);
       }
     }
+    
     return res.json({ success: true });
   } catch (error) {
     console.error('API Error:', error);
