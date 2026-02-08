@@ -80,6 +80,12 @@ const transporter = nodemailer.createTransport({
 // Function to send RSVP notification email
 async function sendRSVPNotificationEmail(guestData) {
   try {
+    console.log('🔍 Starting email send process...');
+    console.log('📧 Environment:', process.env.NODE_ENV);
+    console.log('📧 Gmail user configured:', process.env.GMAIL_USER ? 'YES' : 'NO');
+    console.log('📧 Gmail pass configured:', process.env.GMAIL_PASS ? 'YES' : 'NO');
+    console.log('📧 RSVP email:', process.env.RSVP_EMAIL);
+    
     const { name, attendingWith, guests, answers } = guestData;
     
     const emailContent = `
@@ -136,10 +142,27 @@ async function sendRSVPNotificationEmail(guestData) {
       html: emailContent
     };
 
-    await transporter.sendMail(mailOptions);
+    console.log('📧 Mail options:', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject
+    });
+
+    // Verify transporter connection
+    await transporter.verify();
+    console.log('✅ Transporter verified successfully');
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log('📧 Email sent successfully:', result);
     console.log(`📧 RSVP notification email sent for ${name}`);
   } catch (error) {
     console.error('❌ Failed to send RSVP email:', error);
+    console.error('❌ Error details:', {
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
   }
 }
 
