@@ -519,7 +519,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
               <div className="flex flex-col md:flex-row md:items-center md:justify-center md:gap-8 w-full mb-4 md:mb-0">
                 <div className="space-y-2 md:space-y-1 md:text-center">
                   <p className="font-serif italic text-3xl md:text-6xl tracking-tight text-vintage-plum drop-shadow-lg text-center md:text-left">Geraldine Rumbidzai</p>
-                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">3rd born daughter of Mr M and Mrs C Kagowa</p>
+                  <p className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.4em] text-black text-center md:text-left">3rd born daughter of the Late Mr M, and Mrs C Kagowa</p>
                 </div>
                 
                 <div className="text-3xl md:text-5xl font-serif italic text-vintage-plum/40 text-center md:text-center my-4 md:my-0">— and —</div>
@@ -543,7 +543,7 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
 
               <div className="pt-3 md:pt-3">
                 <p className="text-[12px] font-bold uppercase tracking-[0.4em] text-black mb-1">The Venue</p>
-                <p className="text-3xl md:text-4xl font-serif italic text-vintage-plum drop-shadow-lg">Umwinzii, Harare</p>
+                <p className="text-3xl md:text-4xl font-serif italic text-vintage-plum drop-shadow-lg">Venue Umwinzii, 298 Carrick Creagh Rd, Umwinsdale, Harare, Zimbabwe</p>
               </div>
 　
 　
