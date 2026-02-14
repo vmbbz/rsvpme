@@ -420,8 +420,6 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
     await API.updateState({ 
       newResponse: {
         name: fd.get('name'),
-        attendingWith: fd.get('attendingWith'),
-        guests: parseInt(fd.get('count') as string || '1'),
         answers
       }
     });
@@ -714,20 +712,6 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
                   <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Full Name</label>
                   <input name="name" required className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="..." />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Who are you attending with? (Optional)</label>
-                  <input name="attendingWith" className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic" placeholder="Names of guests you're coming with..." />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-vintage-plum ml-3">Number of Guests</label>
-                  <select name="count" className="w-full bg-white/40 border border-vintage-tan/30 rounded-full p-3 text-md font-serif italic">
-                    <option value="1">1 Guest</option>
-                    <option value="2">2 Guests</option>
-                    <option value="3">3 Guests</option>
-                    <option value="4">4 Guests</option>
-                    <option value="5">5+ Guests</option>
-                  </select>
-                </div>
 
                 {state.questions.map(q => (
                   <div key={q.fieldId} className="space-y-1">
@@ -751,6 +735,25 @@ const HomeView = ({ state, refresh }: { state: AppState, refresh: () => void }) 
 const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void }) => {
   const [authed, setAuthed] = useState(false);
   const [pass, setPass] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleAuth = async () => {
+    setIsLoading(true);
+    console.log('🔐 Admin auth attempt:', { password: pass, expected: state.adminPassword });
+    
+    // Add a small delay to prevent rapid attempts
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (pass === state.adminPassword) {
+      setAuthed(true);
+      console.log('✅ Admin authentication successful');
+    } else {
+      alert('Incorrect password. Please try again.');
+      console.log('❌ Admin authentication failed');
+      setPass('');
+    }
+    setIsLoading(false);
+  };
 
   if (!authed) {
     return (
@@ -758,22 +761,104 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
         <div className="bg-vintage-cream p-16 rounded-[3.5rem] w-full max-w-sm text-center border border-vintage-tan/40">
           <ShieldCheck className="mx-auto mb-10 text-vintage-plum" size={60} />
           <h2 className="text-3xl font-serif italic mb-10 text-vintage-plum">Registry OS</h2>
-          <input type="password" value={pass} onChange={e => setPass(e.target.value)} onKeyDown={e => e.key==='Enter' && (pass===state.adminPassword ? setAuthed(true) : alert('Incorrect'))} className="w-full bg-white/50 p-6 rounded-full text-center mb-10 border border-vintage-tan/30 text-2xl font-serif" placeholder="••••" />
-          <button onClick={() => pass===state.adminPassword ? setAuthed(true) : alert('Incorrect')} className="w-full py-6 bg-vintage-plum text-white rounded-full font-bold uppercase tracking-[0.4em] text-[10px]">Access Portal</button>
+          <input 
+            type="password" 
+            value={pass} 
+            onChange={e => setPass(e.target.value)} 
+            onKeyDown={e => e.key==='Enter' && handleAuth()} 
+            className="w-full bg-white/50 p-6 rounded-full text-center mb-10 border border-vintage-tan/30 text-2xl font-serif" 
+            placeholder="••••" 
+            disabled={isLoading}
+          />
+          <button 
+            onClick={handleAuth} 
+            disabled={isLoading || !pass}
+            className="w-full py-6 bg-vintage-plum text-white rounded-full font-bold uppercase tracking-[0.4em] text-[10px] disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+          >
+            {isLoading ? 'Authenticating...' : 'Access Portal'}
+          </button>
+          <p className="text-xs text-vintage-plum/60 mt-4">Password: {state.adminPassword ? 'Configured' : 'Not set'}</p>
         </div>
       </div>
     );
   }
 
+  const exportToExcel = () => {
+    try {
+      const guests = state.responses.map((r, index) => {
+        const guestData = {
+          'S/N': index + 1,
+          'Name': r.name,
+          'Date': new Date(r.timestamp).toLocaleDateString(),
+          'Time': new Date(r.timestamp).toLocaleTimeString(),
+          'Registration Type': r.aiInteracted ? 'Voice Agent' : 'Manual Registration'
+        };
+        
+        // Add custom questions as columns
+        if (r.answers && typeof r.answers === 'object') {
+          Object.entries(r.answers).forEach(([key, value]) => {
+            guestData[key] = value || '';
+          });
+        }
+        
+        return guestData;
+      });
+      
+      // Create CSV content
+      const headers = Object.keys(guests[0] || {});
+      const csvContent = [
+        headers.join(','),
+        ...guests.map(guest => 
+          headers.map(header => {
+            const value = guest[header];
+            // Escape commas and quotes in CSV
+            if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+              return `"${value.replace(/"/g, '""')}"`;
+            }
+            return value || '';
+          }).join(',')
+        )
+      ].join('\n');
+      
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      const timestamp = new Date().toISOString().split('T')[0];
+      link.setAttribute('href', url);
+      link.setAttribute('download', `wedding-rsvp-guests-${timestamp}.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log('✅ Guest list exported successfully');
+      alert('Guest list exported successfully!');
+    } catch (error) {
+      console.error('❌ Export failed:', error);
+      alert('Export failed. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-vintage-bg p-12 md:p-24 overflow-y-auto">
-      <h1 className="text-6xl font-serif italic text-vintage-plum mb-16 capitalize">Guest Registry</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-6xl font-serif italic text-vintage-plum capitalize">Guest Registry</h1>
+        <button 
+          onClick={exportToExcel} 
+          className="py-3 px-6 bg-vintage-plum text-white rounded-full font-bold uppercase tracking-[0.4em] text-[10px] flex items-center gap-2 hover:bg-vintage-tan transition-colors"
+        >
+          <FileText size={16} />
+          Export to Excel
+        </button>
+      </div>
       <div className="bg-white/40 rounded-[3rem] shadow-lux overflow-hidden border border-vintage-tan/20 backdrop-blur-sm">
         <table className="w-full text-left">
           <thead>
             <tr className="bg-vintage-cream/80 text-[10px] uppercase font-bold text-vintage-plum tracking-[0.4em] border-b border-vintage-tan/20">
               <th className="p-10">Guest Details</th>
-              <th className="p-10 text-center">Party Size</th>
               <th className="p-10">Status</th>
             </tr>
           </thead>
@@ -782,10 +867,7 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
               <tr key={i} className="border-b border-vintage-tan/5 hover:bg-white/20 transition-colors">
                 <td className="p-10">
                   <p className="font-serif italic text-3xl text-vintage-plum">{r.name}</p>
-                  <p className="text-vintage-tan font-bold mt-1 text-[10px] uppercase tracking-[0.2em]">{r.attendingWith || 'Attending alone'}</p>
-                </td>
-                <td className="p-10 text-center">
-                  <span className="text-2xl font-serif italic text-vintage-plum">{r.guests}</span>
+                  <p className="text-vintage-tan font-bold mt-1 text-[10px] uppercase tracking-[0.2em]">{new Date(r.timestamp).toLocaleDateString()}</p>
                 </td>
                 <td className="p-10">
                   <span className={`text-[9px] font-bold px-5 py-2 rounded-full uppercase tracking-[0.3em] ${r.aiInteracted ? 'bg-vintage-plum text-white' : 'bg-vintage-cream text-vintage-plum/40'}`}>

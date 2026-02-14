@@ -39,8 +39,6 @@ const SettingsSchema = new mongoose.Schema({
 
 const GuestSchema = new mongoose.Schema({
   name: String,
-  attendingWith: String,
-  guests: Number,
   answers: Map,
   timestamp: { type: Number, default: Date.now },
   aiInteracted: { type: Boolean, default: false },
@@ -86,7 +84,7 @@ async function sendRSVPNotificationEmail(guestData) {
     console.log('📧 Gmail pass configured:', process.env.GMAIL_PASS ? 'YES' : 'NO');
     console.log('📧 RSVP email:', process.env.RSVP_EMAIL);
     
-    const { name, attendingWith, guests, answers } = guestData;
+    const { name, answers } = guestData;
     
     const emailContent = `
       <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f5f2;">
@@ -101,16 +99,6 @@ async function sendRSVPNotificationEmail(guestData) {
           <p style="margin: 10px 0; color: #3e2723;">
             <strong>Name:</strong> ${name}
           </p>
-          
-          <p style="margin: 10px 0; color: #3e2723;">
-            <strong>Party Size:</strong> ${guests} ${guests === 1 ? 'guest' : 'guests'}
-          </p>
-          
-          ${attendingWith ? `
-            <p style="margin: 10px 0; color: #3e2723;">
-              <strong>Attending With:</strong> ${attendingWith}
-            </p>
-          ` : ''}
           
           ${answers && Object.keys(answers).length > 0 ? `
             <div style="margin-top: 20px;">
@@ -265,7 +253,7 @@ app.post('/api/state', async (req, res) => {
       // Log new RSVP responses to database
       if (newResponse) {
         await Guest.create(newResponse);
-        console.log(`📝 New RSVP from ${newResponse.name} (attending with: ${newResponse.attendingWith || 'alone'}) - saved to database`);
+        console.log(`📝 New RSVP from ${newResponse.name} - saved to database`);
       }
     } else {
       // Database not connected, but email was sent
