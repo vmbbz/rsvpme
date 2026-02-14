@@ -155,17 +155,75 @@ async function sendRSVPNotificationEmail(guestData) {
 }
 
 let dbConnected = false;
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    console.log('Connected to MongoDB Atlas');
+
+// Optimized MongoDB connection for serverless environments
+const connectDB = async (retryCount = 0) => {
+  if (dbConnected) {
+    return;
+  }
+  
+  const maxRetries = 3;
+  
+  try {
+    const options = {
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      bufferMaxEntries: 0, // Disable mongoose buffering
+      bufferCommands: false, // Disable mongoose buffering
+      retryWrites: true,
+      w: 'majority',
+      connectTimeoutMS: 10000, // Connection timeout
+      heartbeatFrequencyMS: 10000, // Heartbeat frequency
+      minPoolSize: 2 // Minimum number of connections in pool
+    };
+    
+    await mongoose.connect(MONGO_URI, options);
     dbConnected = true;
-  })
-  .catch(err => {
-    console.error('Mongo Connection Error:', err);
-  });
+    console.log('✅ Connected to MongoDB Atlas');
+    
+    // Handle connection events
+    mongoose.connection.on('error', (err) => {
+      console.error('❌ MongoDB connection error:', err);
+      dbConnected = false;
+    });
+    
+    mongoose.connection.on('disconnected', () => {
+      console.log('🔌 MongoDB disconnected');
+      dbConnected = false;
+    });
+    
+    mongoose.connection.on('reconnected', () => {
+      console.log('🔄 MongoDB reconnected');
+      dbConnected = true;
+    });
+    
+  } catch (error) {
+    console.error(`❌ MongoDB connection failed (attempt ${retryCount + 1}/${maxRetries}):`, error);
+    dbConnected = false;
+    
+    // Retry logic
+    if (retryCount < maxRetries - 1) {
+      console.log(`🔄 Retrying connection in 2 seconds...`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return connectDB(retryCount + 1);
+    } else {
+      console.error('❌ Max retry attempts reached. Connection failed.');
+      throw error;
+    }
+  }
+};
+
+// Initialize connection
+connectDB().catch(console.error);
 
 app.get('/api/state', async (req, res) => {
   try {
+    // Ensure database connection
+    if (!dbConnected) {
+      await connectDB();
+    }
+    
     if (dbConnected) {
       let settings = await Settings.findOne();
       if (!settings) {
@@ -213,6 +271,29 @@ app.get('/api/state', async (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    // Ensure database connection
+    if (!dbConnected) {
+      await connectDB();
+    }
+    
+    res.json({
+      status: 'ok',
+      dbConnected: dbConnected,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      dbConnected: dbConnected,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 app.post('/api/state', async (req, res) => {
   try {
     const { newResponse, ...settingsData } = req.body;
@@ -221,6 +302,11 @@ app.post('/api/state', async (req, res) => {
     if (newResponse) {
       console.log('📧 Attempting to send email notification...');
       await sendRSVPNotificationEmail(newResponse);
+    }
+    
+    // Ensure database connection
+    if (!dbConnected) {
+      await connectDB();
     }
     
     if (dbConnected) {
