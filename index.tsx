@@ -785,6 +785,8 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
 
   const exportToExcel = () => {
     try {
+      console.log('📊 Exporting guests:', state.responses);
+      
       const guests = state.responses.map((r, index) => {
         const guestData = {
           'S/N': index + 1,
@@ -795,17 +797,35 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
         };
         
         // Add custom questions as columns
-        if (r.answers && typeof r.answers === 'object') {
-          Object.entries(r.answers).forEach(([key, value]) => {
+        console.log(`📝 Guest ${r.name} answers:`, r.answers);
+        if (r.answers) {
+          // Handle both Map and Object formats
+          let answersObj = {};
+          if (typeof r.answers === 'object') {
+            if (r.answers instanceof Map) {
+              // Convert Map to plain object
+              r.answers.forEach((value, key) => {
+                answersObj[key] = value || '';
+              });
+            } else {
+              // Already a plain object
+              answersObj = r.answers;
+            }
+          }
+          
+          Object.entries(answersObj).forEach(([key, value]) => {
             guestData[key] = value || '';
           });
         }
         
+        console.log(`📊 Guest data for ${r.name}:`, guestData);
         return guestData;
       });
       
       // Create CSV content
       const headers = Object.keys(guests[0] || {});
+      console.log('📋 CSV Headers:', headers);
+      
       const csvContent = [
         headers.join(','),
         ...guests.map(guest => 
@@ -819,6 +839,8 @@ const AdminView = ({ state, refresh }: { state: AppState, refresh: () => void })
           }).join(',')
         )
       ].join('\n');
+      
+      console.log('📄 CSV Content preview:', csvContent.substring(0, 500));
       
       // Create and download file
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
